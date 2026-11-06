@@ -143,7 +143,7 @@ def clean(text):
     return re.sub(r"\s+", " ", text).strip()
 
 
-def get_tldr(n=4):
+def get_tldr(n=2):
     root = ET.fromstring(fetch(TLDR_RSS))
     item = root.find("./channel/item")
     link = item.findtext("link")
@@ -233,39 +233,33 @@ def build_html(now, w, tldr_date, stories, headlines):
     sunrise = daily["sunrise"][0][-5:]
     sunset = daily["sunset"][0][-5:]
 
-    # Prochaines heures : 6 créneaux toutes les 3 h à partir de l'heure suivante
+    # Quatre créneaux et trois jours : priorité à la lisibilité sur 6 pouces.
     times = [dt.datetime.fromisoformat(t).replace(tzinfo=TZ) for t in hourly["time"]]
     start = next(i for i, t in enumerate(times) if t > now)
     hours_html = ""
-    for i in range(start, min(start + 18, len(times)), 3):
+    for i in range(start, min(start + 12, len(times)), 3):
         pp = hourly["precipitation_probability"][i]
         hours_html += (
             f'<div class="h"><div class="hh">{times[i].hour:02d}h</div>'
-            f'{icon(hourly["weather_code"][i], hourly["is_day"][i], 24, 1.8)}'
+            f'{icon(hourly["weather_code"][i], hourly["is_day"][i], 32, 1.8)}'
             f'<div class="ht">{round(hourly["temperature_2m"][i])}°</div>'
             f'<div class="hp">{pp if pp is not None else 0}&#8239;%</div></div>'
         )
 
-    tmin_all = min(daily["temperature_2m_min"][1:6])
-    tmax_all = max(daily["temperature_2m_max"][1:6])
-    span = max(tmax_all - tmin_all, 1)
     days_html = ""
-    for i in range(1, 6):
+    for i in range(1, 4):
         d = dt.date.fromisoformat(daily["time"][i])
         lo, hi = daily["temperature_2m_min"][i], daily["temperature_2m_max"][i]
-        left = (lo - tmin_all) / span * 100
-        width = max((hi - lo) / span * 100, 6)
         days_html += (
-            f'<div class="d"><div class="dn">{JOURS_COURTS[d.weekday()]}</div>'
-            f'{icon(daily["weather_code"][i], True, 26, 1.8)}'
+            f'<div class="d"><div class="day-top"><div class="dn">{JOURS_COURTS[d.weekday()]} {d.day}</div>'
+            f'{icon(daily["weather_code"][i], True, 28, 1.8)}</div>'
             f'<div class="dt"><b>{round(hi)}°</b> <span>{round(lo)}°</span></div>'
-            f'<div class="bar"><i style="left:{left:.0f}%;width:{width:.0f}%"></i></div>'
             f'<div class="dp">{daily["precipitation_probability_max"][i] or 0}&#8239;% pluie</div></div>'
         )
 
     stories_html = ""
     for k, s in enumerate(stories, 1):
-        meta = f'<span class="rt">{esc(s["read"])}</span>' if s["read"] else ""
+        meta = ""
         stories_html += (
             f'<div class="st"><div class="num">{k}</div><div>'
             f'<div class="stt">{esc(s["title"])} {meta}</div>'
@@ -293,57 +287,58 @@ body {{ font-family: Inter, sans-serif; padding: 20px 22px 14px; display: flex; 
 .ico {{ display: block; }}
 header {{ display: flex; justify-content: space-between; align-items: flex-end;
           padding-bottom: 7px; border-bottom: 3px solid #000; }}
-.kick {{ font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }}
-h1 {{ font-family: News; font-weight: 600; font-size: 29px; line-height: 1; margin-top: 3px; letter-spacing: -.01em; }}
-.ed {{ text-align: right; font-size: 10.5px; color: #333; line-height: 1.4; }}
+.kick {{ font-size: 14px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }}
+h1 {{ font-family: News; font-weight: 600; font-size: 33px; line-height: 1; margin-top: 4px; letter-spacing: -.01em; }}
+.ed {{ text-align: right; font-size: 14px; color: #222; line-height: 1.3; flex-shrink: 0; }}
 .ed b {{ color: #000; font-weight: 700; }}
 
 .now {{ display: flex; gap: 14px; align-items: center; padding: 10px 0 6px; }}
-.temp {{ font-family: News; font-size: 70px; font-weight: 500; line-height: .85; letter-spacing: -.04em; }}
-.cond {{ font-family: News; font-size: 21px; font-weight: 600; line-height: 1.05; }}
-.sub {{ font-size: 11.5px; color: #222; margin-top: 5px; line-height: 1.4; }}
-.facts {{ display: flex; justify-content: space-between; font-size: 11.5px; padding: 5px 0 7px; color: #222; }}
+.temp {{ font-family: News; font-size: 85px; font-weight: 500; line-height: .85; letter-spacing: -.04em; }}
+.cond {{ font-family: News; font-size: 26px; font-weight: 600; line-height: 1.05; }}
+.sub {{ font-size: 16px; color: #111; margin-top: 5px; line-height: 1.25; }}
+.facts {{ display: flex; justify-content: space-between; gap: 12px; font-size: 15px; padding: 5px 0 9px; color: #111; }}
 .facts b {{ font-weight: 700; color: #000; }}
 
-.hours {{ display: grid; grid-template-columns: repeat(6, 1fr); border-top: 2px solid #000;
+.hours {{ display: grid; grid-template-columns: repeat(4, 1fr); border-top: 2px solid #000;
           border-bottom: 2px solid #000; }}
-.h {{ display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 5px 0;
+.h {{ display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1px 5px; padding: 6px 9px;
       border-left: 1px solid #999; }}
 .h:first-child {{ border-left: 0; }}
-.hh {{ font-size: 10.5px; font-weight: 600; color: #333; }}
-.ht {{ font-size: 15px; font-weight: 700; }}
-.hp {{ font-size: 9.5px; color: #333; }}
+.h .ico {{ grid-column: 2; grid-row: 1 / span 2; }}
+.hh {{ font-size: 16px; font-weight: 600; color: #222; }}
+.ht {{ font-size: 23px; font-weight: 700; }}
+.hp {{ display: none; }}
 
-.days {{ display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 7px 0 10px; }}
-.d {{ display: flex; flex-direction: column; align-items: center; gap: 2px; }}
-.dn {{ font-size: 11px; font-weight: 700; }}
-.dt {{ font-size: 13px; }} .dt b {{ font-weight: 700; }} .dt span {{ color: #444; }}
-.bar {{ position: relative; width: 78%; height: 4px; background: #ccc; border-radius: 2px; margin: 1px 0; }}
-.bar i {{ position: absolute; top: 0; bottom: 0; background: #000; border-radius: 2px; }}
-.dp {{ font-size: 9.5px; color: #333; }}
+.days {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding: 8px 0 10px; }}
+.d {{ display: flex; flex-direction: column; gap: 2px; }}
+.day-top {{ display: flex; align-items: center; justify-content: space-between; }}
+.dn {{ font-size: 16px; font-weight: 700; }}
+.dt {{ font-size: 22px; }} .dt b {{ font-weight: 700; }} .dt span {{ color: #333; }}
+.dp {{ font-size: 15px; color: #222; }}
 
 .sec {{ display: flex; align-items: baseline; justify-content: space-between;
         border-top: 3px solid #000; padding-top: 6px; }}
-.sec h2 {{ font-family: News; font-size: 20px; font-weight: 600; letter-spacing: -.01em; }}
-.sec span {{ font-size: 9.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #333; }}
+.sec h2 {{ font-family: News; font-size: 26px; font-weight: 600; letter-spacing: -.01em; }}
+.sec span {{ font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #222; }}
 
-.st {{ display: grid; grid-template-columns: 18px 1fr; gap: 3px; padding: 6px 0;
+.st {{ display: grid; grid-template-columns: 22px 1fr; gap: 5px; padding: 7px 0;
        border-bottom: 1px solid #999; }}
-.num {{ font-family: News; font-size: 17px; font-weight: 600; line-height: 1.05; }}
-.stt {{ font-family: News; font-size: 14.5px; font-weight: 650; line-height: 1.2; }}
+.num {{ font-family: News; font-size: 24px; font-weight: 600; line-height: 1.05; }}
+.stt {{ font-family: News; font-size: 23px; font-weight: 650; line-height: 1.12;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
 .rt {{ font-family: Inter; font-size: 9px; font-weight: 600; color: #444; white-space: nowrap; }}
-.sts {{ font-size: 10.5px; line-height: 1.38; color: #111; margin-top: 2px;
+.sts {{ font-size: 18px; line-height: 1.25; color: #111; margin-top: 3px;
         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
 
 .wire {{ margin-top: 8px; }}
-.wire h3 {{ font-size: 9.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+.wire h3 {{ font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
             padding-bottom: 3px; border-bottom: 2px solid #000; }}
 .hl {{ padding: 5px 0; border-bottom: 1px solid #999; }}
-.hs {{ font-size: 8.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #333; }}
-.htl {{ font-family: News; font-size: 13px; font-weight: 550; line-height: 1.2; margin-top: 1px;
+.hs {{ font-size: 13px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; color: #222; }}
+.htl {{ font-family: News; font-size: 21px; font-weight: 550; line-height: 1.15; margin-top: 2px;
         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
 
-footer {{ margin-top: auto; flex-shrink: 0; display: flex; justify-content: space-between; font-size: 8.5px;
+footer {{ margin-top: auto; flex-shrink: 0; display: flex; justify-content: space-between; font-size: 12px;
           color: #333; padding-top: 5px; border-top: 2px solid #000; }}
 </style></head><body>
 <header>
@@ -367,17 +362,17 @@ footer {{ margin-top: auto; flex-shrink: 0; display: flex; justify-content: spac
 <section class="hours">{hours_html}</section>
 <section class="days">{days_html}</section>
 
-<div class="sec"><h2>Intelligence artificielle</h2><span>TLDR AI · {tldr_txt}</span></div>
+<div class="sec"><h2>Actualités IA</h2><span>TLDR AI · {tldr_txt}</span></div>
 <section>{stories_html}</section>
 
-<section class="wire"><h3>Le fil · TechCrunch · The Verge · MIT Tech Review</h3>
+<section class="wire"><h3>Le fil</h3>
   <div>{heads_html}</div></section>
 
-<footer><span>Open-Meteo · TLDR AI · TechCrunch · The Verge · MIT Technology Review</span>
-<span>Prochaine mise à jour : {nxt:02d}h00</span></footer>
+<footer><span>Open-Meteo · TLDR AI</span>
+<span>Actualisation : {nxt:02d}h00</span></footer>
 <script>
 // Garde-fou : retire les derniers éléments tant que la page déborde.
-(function () {{
+function fitPage() {{
   var limit = {CSS_H} - 14;
   function over() {{ var f = document.querySelector("footer"); return f.getBoundingClientRect().bottom > limit; }}
   var pools = [".hl", ".st"];
@@ -385,7 +380,9 @@ footer {{ margin-top: auto; flex-shrink: 0; display: flex; justify-content: spac
     var els = document.querySelectorAll(pools[p]);
     for (var i = els.length - 1; i >= 1 && over(); i--) els[i].remove();
   }}
-}})();
+}}
+document.fonts.ready.then(fitPage);
+window.addEventListener("load", fitPage);
 </script></body></html>"""
 
 
