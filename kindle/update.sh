@@ -15,7 +15,7 @@ echo "$(date -u '+%Y-%m-%dT%H:%M:%SZ') Début de mise à jour"
 # dorment. Réaffirmer le réglage et attendre une vraie connexion HTTPS.
 lipc-set-prop com.lab126.cmd wirelessEnable 1
 READY=0
-for ATTEMPT in 1 2 3 4 5 6 7 8; do
+for ATTEMPT in 1 2 3 4 5 6 7 8 9 10 11 12; do
     if curl --fail --silent --show-error --location --proto '=https' \
         --connect-timeout 3 --max-time 5 \
         https://florentpit.github.io/kindle-dashboard/version.txt -o /dev/null; then
