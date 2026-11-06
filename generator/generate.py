@@ -12,6 +12,7 @@ import argparse
 import datetime as dt
 import email.utils
 import html
+import hashlib
 import json
 import os
 import re
@@ -33,6 +34,13 @@ WIDTH, HEIGHT = 1072, 1448          # Kindle 11e gén. (2024), 6", 300 ppi
 SCALE = 2                           # mise en page en 536x724 px CSS
 CSS_W, CSS_H = WIDTH // SCALE, HEIGHT // SCALE
 UPDATE_HOURS = (7, 12, 18)          # heures de mise à jour (Europe/Paris)
+
+
+def refresh_schedule(now, days=14):
+    """Instants UTC pour le Kindle, calculés avec les règles d'heure de Paris."""
+    return [int(dt.datetime.combine(now.date() + dt.timedelta(days=d),
+                                   dt.time(hour=h), TZ).timestamp())
+            for d in range(days) for h in UPDATE_HOURS]
 
 TLDR_RSS = "https://tldr.tech/api/rss/ai"
 FEEDS = [
@@ -431,6 +439,13 @@ def main():
     os.remove(raw)
     with open(os.path.join(out, "version.txt"), "w") as f:
         f.write(now.isoformat(timespec="seconds") + "\n")
+    # Formats simples lisibles par BusyBox, sans Python ni base de fuseaux sur le Kindle.
+    with open(os.path.join(out, "schedule.txt"), "w") as f:
+        f.write("".join(f"{t}\n" for t in refresh_schedule(now)))
+    with open(os.path.join(out, "dashboard.png"), "rb") as f:
+        digest = hashlib.sha256(f.read()).hexdigest()
+    with open(os.path.join(out, "dashboard.sha256"), "w") as f:
+        f.write(f"{digest}  dashboard.png\n")
     print(f"OK -> {os.path.join(out, 'dashboard.png')}")
 
 
