@@ -1,188 +1,127 @@
-# Dashboard Kindle — état du projet (6 novembre 2026)
+# Dashboard Kindle — reprise du 6 novembre 2026
 
-## Objectif
-Afficher sur l'écran de veille d'un Kindle un dashboard avec la météo de
-Bouliac (33270) et les dernières actus IA (TLDR AI + TechCrunch/The Verge/MIT
-Tech Review), mis à jour 3×/jour (7h, 12h, 18h, heure de Paris), sans dépendre
-du Mac une fois en place.
+## Objectif et préférences actuelles
 
-## Reprise du 6 novembre — état réel de l'installation
+Dashboard de veille pour Bouliac (33270) : météo, prévisions et actualités IA
+américaines (TLDR AI, TechCrunch, The Verge, MIT Technology Review).
+**Florent a remplacé les trois mises à jour quotidiennes par une mise à jour
+à chaque heure pleine, 24 h/24.** Il demande aussi des polices beaucoup plus
+grandes : la nouvelle maquette est générée et publiée côté code, à afficher
+sur l'appareil pour validation. Les titres restent en anglais.
 
-- Dashboard régénéré et contrôlé visuellement, toujours en 1072×1448 gris.
-- Planification cloud corrigée : trois générations à 6h30, 11h30 et 17h30,
-  `timezone: Europe/Paris`, pour les affichages prévus à 7h, 12h et 18h.
-- Le générateur publie aussi `schedule.txt` (14 jours d'instants UTC calculés
-  en heure de Paris) et `dashboard.sha256`.
-- Client de téléchargement atomique : `kindle/refresh.sh`. Vérification du
-  SHA-256 et de l'en-tête PNG/résolution avant remplacement de l'image ;
-  conservation du cache en cas d'échec ; dessin uniquement en veille.
-- Quatre tests passent : téléchargement valide, image tronquée, page HTML
-  avec somme correcte, changements d'heure été/hiver.
-- Écran de veille retenu : **chengandre/kindle-custom-screensaver v0.6.0**,
-  testé en amont sur Kindle 11 / 5.19.5. Paquet vérifié par SHA-256 et préparé
-  dans `.local/device/` avec `sh scripts/prepare-device.sh`.
-- **Jailbreak non terminé** : Shadow v1.0.2 a détecté le bon appareil et
-  transféré `jb.sh`, puis son binaire Mac a planté dans
-  `libusb_release_interface` après la reconnexion, avant `chain.Fire`.
-  Aucun envoi du payload d'exécution n'a été observé.
-- Shadow a ensuite été compilé depuis sa source avec Go 1.27.3 et la
-  bibliothèque libusb Homebrew 1.0.30. Ses tests cmd/shadow, usbdev, mtp et
-  chain passent. Binaire : `.local/shadow/shadow-native`.
-- Le second essai n'a trouvé aucun Kindle en USB et s'est arrêté proprement
-  après attente. La correction du plantage n'a donc pas encore pu être
-  vérifiée sur le matériel.
-- L'utilisateur a confirmé de nouveau **5.19.5 (4794270058)**.
-- Journaux locaux : `.local/shadow/install.log` et `install-native.log`.
-  `.local/` est ignoré par Git.
-- **Prochain prérequis** : obtenir une connexion USB de données stable,
-  puis relancer Shadow avec les droits administrateur via la fenêtre macOS.
-  Ne demander le débranchement/rebranchement qu'après le message de Shadow.
-- **Encore à faire après le jailbreak** : transférer le paquet, exécuter
-  `Diagnostic Dashboard` pour identifier les interfaces powerd réelles,
-  installer et tester le réveil RTC/rafraîchissement automatique, la reprise
-  après redémarrage et l'affichage physique. Le téléchargement et le paquet
-  préparés ne constituent pas encore un service autonome installé.
+Le Kindle doit être autonome sur le Wi-Fi et conserver son usage normal de
+lecture. Pas de dépendance au Mac après installation.
 
-### Dernier point de reprise
+## Appareil et accès
 
-- Publication GitHub Pages terminée et vérifiée directement : image valide
-  1072×1448 en niveaux de gris, SHA-256 concordant, calendrier accessible.
-  Le client `kindle/refresh.sh` a aussi réussi un téléchargement réel depuis
-  le Mac (avec `shasum` à la place de `sha256sum`).
-- Un redémarrage du Kindle a rétabli sa détection USB. La version compilée
-  de Shadow a pu retransférer `jb.sh`, mais sa fermeture de connexion a
-  généré une fausse déconnexion/reconnexion, **sans débranchement physique**
-  (confirmation de Florent). Ensuite : `libusb: no device`, avant le jailbreak.
-- Une correction du seul transport Mac est conservée dans
-  `patches/shadow-macos-usb.patch` : énumération sans ouvrir de handle pendant
-  l'attente du rebranchement et désactivation de l'auto-rattachement du pilote
-  avant fermeture sur Darwin. Hypothèse cohérente avec le problème libusb
-  https://github.com/libusb/libusb/issues/1923 ; **pas encore validée sur le Kindle**.
-- Source Shadow épinglée : `8019ed3f59a1176bf287291cd0bdaf18a177decb`.
-  Reconstruction : `sh scripts/build-shadow-macos.sh` (Go, pkg-config,
-  libusb >= 1.0.30 requis). Les tests Shadow passent avec la correction.
-- Binaire corrigé préparé : `.local/shadow/shadow-native-fixed`.
-- L'outil de contrôle UI a refusé l'accès à Terminal pour raisons de sécurité.
-  Florent lance donc lui-même :
-  `sudo sh /Users/florentpitoun/Dev/Kindle/scripts/jailbreak-local.sh`.
-  Suivre ensuite `.local/shadow/install-native.log` ; ne demander le
-  débranchement physique qu'après le message de transfert terminé.
-- **Action actuellement demandée à Florent** : redémarrage normal, câble
-  débranché, via Paramètres / Options de l'appareil / Redémarrer ; puis
-  rebrancher et relancer la commande ci-dessus. Il a contesté à juste titre
-  la répétition de la consigne de maintien 40 secondes : celle-ci vient de
-  la procédure générique de redémarrage forcé Amazon, pas d'une instruction
-  spécifique vérifiée pour le Basic 2024. Privilégier le menu si l'appareil répond.
+- Kindle Basic 5 / 11e génération, modèle 2024, sauge.
+- Série : G093L207548406G7 ; USB 1949:9981.
+- Firmware confirmé : 5.19.5, build 4794270058.
+- Linux 4.9.77-lab126, ARMv7, écran 1072×1448, 8 bits gris.
+- **Jailbreak réussi**, environnement KMC v2.6.0. Les scriptlets fonctionnent.
+- OTA vérifié : otaupd, otav3 et ota-update arrêtés ; exécutables de mise à
+  jour désactivés par le jailbreak. Racine remontée en lecture seule.
+- Jobman 1.2.2 installé. Florent a activé Wi-Fi SSH dans Jobman.
+- Adresse communiquée : **192.168.1.27**, port **22**.
+- Accès testé par clé (pas par mot de passe) :
+  `ssh -i .local/mac-key -o IdentitiesOnly=yes -o UserKnownHostsFile=.local/known_hosts root@192.168.1.27`
+- Les clés, journaux et captures sont dans `.local/`, ignoré par Git.
+  Ne jamais ajouter la clé privée ou les paquets personnalisés au dépôt public.
+- Le serveur SSH lancé par Jobman n'est pas installé au démarrage. Après un
+  redémarrage, rouvrir Jobman et activer Wi-Fi SSH si un accès est nécessaire.
 
-## Matériel
-- **Kindle 11e génération, modèle 2024** (basique, couleur sauge), connecté
-  en USB-C au Mac, reconnu en MTP comme « Amazon Kindle » (VID 0x1949, PID
-  0x9981).
-- Numéro de série : `G093L207548406G7`.
-- **Firmware actuel : Kindle 5.19.5, build 4794270058** (vu dans Paramètres →
-  Options de l'appareil → Infos sur l'appareil). Mode avion activé pour
-  bloquer les mises à jour OTA.
-- Écran : 6 pouces, 300 ppi → résolution 1072×1448 (portrait).
+## Hébergement et génération
 
-## Ce qui est fait
-1. **Générateur du dashboard** : [generator/generate.py](generator/generate.py)
-   - Récupère la météo via l'API Open-Meteo (gratuite, sans clé) pour
-     Bouliac (lat 44.8193, lon -0.50265).
-   - Récupère les 3 premiers articles de la dernière édition de TLDR AI
-     (flux RSS `https://tldr.tech/api/rss/ai`, puis scraping de la page de
-     l'édition pour le résumé de chaque article) + quelques titres récents
-     de TechCrunch, The Verge, MIT Technology Review.
-   - Compose une page HTML (polices Inter + Newsreader, en local dans
-     `generator/fonts/`), la rend en PNG via Chrome headless
-     (`--headless=new --screenshot`), puis la convertit en niveaux de gris
-     avec Pillow.
-   - Sortie : `site/dashboard.png` (1072×1448, 8 bits gris) + `site/dashboard.html`
-     + `site/version.txt`.
-   - Un script JS en fin de page retire les derniers blocs (actus, fil
-     d'actu) si le contenu dépasse la hauteur de l'écran, pour que l'image
-     ne soit jamais coupée.
-2. **Automatisation cloud** : [.github/workflows/dashboard.yml](.github/workflows/dashboard.yml)
-   - Tourne sur GitHub Actions, cron à 5h30/6h30, 10h30/11h30, 16h30/17h30
-     UTC (couvre 7h/12h/18h Paris été comme hiver), + déclenchement manuel
-     et à chaque push.
-   - Publie `site/` sur la branche `gh-pages` du dépôt (GitHub Pages),
-     avec `force_orphan: true` pour ne garder qu'un commit à chaque fois.
-3. **Dépôt GitHub** : https://github.com/florentpit/kindle-dashboard
-   - Public (nécessaire pour GitHub Pages gratuit).
-   - `gh` est authentifié sur ce Mac (compte `florentpit`), `git push`
-     fonctionne.
-   - **Image publiée en continu à** :
-     `https://florentpit.github.io/kindle-dashboard/dashboard.png`
-   - Un premier run automatique (12h00) a réussi et produit une image
-     identique à celle générée en local.
-4. **Mise en page validée** pour l'écran 1072×1448 du Kindle 2024 (voir
-   capture envoyée dans la conversation) : en-tête date/ville, météo du
-   jour + heures suivantes + 5 prochains jours, section actus IA (TLDR),
-   fil de titres, pied de page avec sources et heure de prochaine mise à
-   jour.
+Dépôt : https://github.com/florentpit/kindle-dashboard
+Image : https://florentpit.github.io/kindle-dashboard/dashboard.png
 
-## Ce qui reste à faire
-1. **Jailbreak du Kindle** (nécessaire pour qu'il affiche une image
-   personnalisée en écran de veille et se mette à jour seul).
-   - Piste identifiée : outil **Shadow** (dépôt GitHub `KindleModding/Shadow`),
-     jailbreak MTP qui couvre les firmwares 5.19.4 à 5.19.6, avec une entrée
-     de base de données précise pour le build `4794270058` (celui du
-     Kindle ci-dessus) sur un modèle « Kindle Basic 5 (2024) ».
-   - Le site de référence communautaire est **kindlemodding.org** (rubrique
-     « Jailbreaking »), qui liste plusieurs méthodes selon le firmware
-     (Shadow, Véra, SpringBreak, AdBreak, Sanctuary, SpiderCat, Nosebleed).
-     Un assistant interactif y aide à choisir la bonne méthode selon le
-     modèle et le firmware exacts : https://kindlemodding.org/jailbreak-wizard.html
-   - Ce site documente aussi les étapes suivantes une fois le jailbreak
-     fait : désactiver les mises à jour auto, installer un gestionnaire de
-     paquets (KPM), et éventuellement un accès SSH/réseau par Wi-Fi pour ne
-     plus dépendre d'un câble.
+- Open-Meteo pour Bouliac (44.8193, -0.50265).
+- Générateur Pillow + Chrome headless ; polices locales Inter et Newsreader.
+- PNG natif 1072×1448 en niveaux de gris, `dashboard.sha256`, `version.txt`
+  et `schedule.txt` (14 jours d'instants UTC).
+- GitHub Actions : génération horaire à **h45**, fuseau Europe/Paris, pour
+  l'affichage à l'heure pleine suivante. Publication sur gh-pages / Pages.
+- Nouvelle maquette : résumés 36 px au lieu de 21, titres 46 px au lieu de 29,
+  quatre créneaux météo, trois jours de prévisions, deux sujets TLDR et un fil
+  complémentaire. Contenu réduit si nécessaire, sans réduire les polices.
+- Dernier commit de mise en page poussé : **05e30eb**. Les tests/génération
+  GitHub et le déploiement Pages ont réussi. Le HTML publié a été vérifié :
+  résumés à 18 px CSS (36 px natifs), titres à 23 px CSS (46 px natifs).
 
-2. **Identifier comment personnaliser l'écran de veille** une fois le
-   jailbreak fait : kindlemodding.org mentionne la possibilité de changer
-   les écrans de veille par défaut, mais le mécanisme précis (dossier,
-   script, extension) n'a pas encore été confirmé pour ce firmware — à
-   vérifier dans la documentation « What's Next » / post-jailbreak du site
-   une fois le jailbreak réalisé.
-3. **Scripter la récupération automatique** : une fois le Kindle
-   jailbreaké et un accès shell/SSH disponible, écrire un script (sur le
-   Kindle, programmé via `cron` ou équivalent une fois dispo) qui, à 7h/12h/18h :
-   - se réveille,
-   - vérifie le Wi-Fi,
-   - télécharge `https://florentpit.github.io/kindle-dashboard/dashboard.png`,
-   - le place comme image d'écran de veille,
-   - se rendort.
-4. **Tester sur l'appareil réel** et ajuster la mise en page si besoin
-   (contraste, taille de police, cadrage) après un premier affichage réel.
+## Logiciels installés sur le Kindle
 
-## Décisions prises avec l'utilisateur
-- Ville : **Bouliac (33270)**.
-- Hébergement du générateur : **GitHub Actions + GitHub Pages** (gratuit),
-  plutôt qu'un VPS personnel — ce dernier reste une option pour plus tard.
-- Langue des actus : titres en anglais (sources américaines d'origine),
-  pas de traduction pour l'instant.
-- Le dashboard remplace uniquement l'image d'écran de veille, rien d'autre
-  sur l'appareil.
-- Objectif explicite : le Kindle doit fonctionner **seul**, dépendant
-  uniquement du Wi-Fi, pas du Mac, une fois tout en place.
+`/mnt/us/extensions/bouliac-dashboard/` :
 
-## Fichiers du projet
-```
-Kindle/
-├── PROJET.md                     ce fichier
-├── generator/
-│   ├── generate.py               générateur du dashboard
-│   └── fonts/                    Inter.ttf, Newsreader.ttf
-├── site/                         sortie locale (ignorée par git)
-│   ├── dashboard.html
-│   ├── dashboard.png
-│   └── version.txt
-└── .github/workflows/
-    └── dashboard.yml             automatisation GitHub Actions
-```
+- `refresh.sh` : téléchargement HTTPS, vérification SHA-256 et en-tête PNG,
+  remplacement atomique, conservation du dernier écran valide en cas d'échec.
+  Ne dessine que si l'appareil est en veille et que le shield est actif.
+- `update.sh` : lance le téléchargement et gère l'activation du Wi-Fi.
+- `service.sh` : lance l'écran de veille et le planificateur RTC.
+- `kron` : KindleCron v0.2.0, source 79e4b43dc2701852f991875873c72fbfb3314245,
+  ARMv7 statique avec `-tags timetzdata`. La dernière version du service
+  utilise UTC pour le cron horaire : les heures pleines UTC coïncident
+  toujours avec celles de Paris, sans ambiguïté au changement d’heure.
+  Cette version du service n’est pas encore transférée sur le Kindle. Licence et source indiquées à côté du binaire.
+- `kron-data/` : tâches, état persistant et journaux du planificateur.
 
-## Pour reprendre ce travail
-- Dépôt : https://github.com/florentpit/kindle-dashboard
-- Image en ligne : https://florentpit.github.io/kindle-dashboard/dashboard.png
-- Référence jailbreak : https://kindlemodding.org/jailbreaking/
-- Dépôt de l'outil pressenti : https://github.com/KindleModding/Shadow
+Écran de veille : chengandre/kindle-custom-screensaver v0.6.0, dans
+`/mnt/us/extensions/custom-screensaver/`. Écoute les événements powerd,
+masque le renderer Amazon en veille et le restaure à l'arrêt.
+Image : `/mnt/us/screensavers/bouliac-dashboard.png`.
+
+Service Upstart installé : `/etc/upstart/bouliac-dashboard.conf`, démarrage
+sur `framework_ready`. Il est **start/running**, mais sa reprise après un vrai
+redémarrage reste à tester.
+
+## État exact des vérifications et prochaine action
+
+- Téléchargement réel depuis le Kindle : réussi, SHA-256 et PNG valides.
+- Premier affichage en veille : confirmé correct par Florent, mais il juge
+  ensuite les polices beaucoup trop petites. La nouvelle version agrandie
+  doit maintenant remplacer cette image sur l'appareil.
+- Les quatre tests Python passent (cache protégé contre téléchargement
+  tronqué/HTML, PNG valide, calendrier horaire DST de 23/25 heures).
+- Les tests amont KindleCron passent. Présence de rtcWakeup et abortSuspend
+  confirmée sur cet appareil.
+- Test RTC ponctuel nommé `rtc-test`, à **17:19:48 Europe/Paris**, exécutant
+  update.sh. L'appareil a été mis en veille via powerButton et laissé sans
+  connexion de contrôle jusqu'à cette heure.
+- **Résultat RTC pas encore vérifié** : après l'heure du test, SSH et ping ne
+  répondent plus. Il faut lire les journaux pour distinguer réveil RTC et
+  réactivation réseau. Ne pas prétendre que l'autonomie en veille est validée.
+- Florent a reçu cette dernière consigne : réveiller le Kindle puis vérifier
+  dans Jobman que Wi-Fi SSH est activé ; communiquer la nouvelle IP si elle
+  a changé. En attente de sa réponse. 192.168.1.27 ne répond toujours pas.
+- Récupérer ensuite :
+  `/mnt/us/extensions/bouliac-dashboard/kron-data/kron.log`,
+  `kron-data/state/rtc-test.log`, `last-success.txt`, le statut powerd.
+- Le planning actuellement installé sur le Kindle est encore **7/12/18** :
+  le remplacer après ce test par `0 * * * *` ; la modification horaire est
+  déjà faite côté cloud et dans `kindle/install-service.sh`.
+- Mettre à jour le client refresh.sh (limite du calendrier relevée à 400 lignes),
+  installer l'image aux grandes polices et les derniers scripts corrigés.
+- Tester ensuite le réveil horaire réel, puis le démarrage après reboot.
+
+## Scripts de préparation
+
+- `scripts/build-kron.sh` : reconstruit le planificateur avec les fuseaux intégrés.
+- `scripts/prepare-device.sh` : compose un paquet local, sans toucher à l'appareil.
+- `kindle/setup.sh` : scriptlet Configurer Dashboard ; corrigé pour ne pas
+  réinstaller Jobman quand il est déjà présent. La version encore sur l'appareil
+  essaie de le réinstaller et peut échouer au deuxième lancement.
+- `kindle/install-service.sh` : installe la tâche horaire et le service Upstart.
+
+## Historique USB utile
+
+Shadow officiel v1.0.2 plantait dans libusb 1.0.29 après reconnexion. Un build
+natif libusb 1.0.30 ne plantait plus mais perdait encore le périphérique.
+`patches/shadow-macos-usb.patch` corrige la fermeture du transport Darwin et
+l'énumération pendant l'attente du rebranchement. L'essai corrigé a atteint
+Address leak collected puis Payload delivered, suivi du jailbreak confirmé.
+Sources et reconstruction : scripts/build-shadow-macos.sh, scripts/jailbreak-local.sh.
+**Ne plus relancer le jailbreak sur cet appareil déjà jailbreaké.**
+
+L'outil de contrôle UI refuse Terminal ; les commandes sudo du Mac ont été
+lancées manuellement par Florent. Le contrôle SSH du Kindle fonctionne sans sudo.
+Un redémarrage normal par le menu suffit quand l'appareil répond ; ne pas
+répéter inutilement la consigne générique de maintien 40 secondes.

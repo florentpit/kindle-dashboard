@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 BASE=/mnt/us/extensions/bouliac-dashboard
-export TZ=Europe/Paris
+export TZ=UTC
 chmod +x "$BASE/kron"
 "$BASE/kron" -dir "$BASE/kron-data" add -timeout 3m dashboard \
     '0 * * * *' /bin/sh "$BASE/update.sh"

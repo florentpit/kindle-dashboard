@@ -3,7 +3,9 @@
 set -eu
 BASE=/mnt/us/extensions/bouliac-dashboard
 SS=/mnt/us/extensions/custom-screensaver
-export TZ=Europe/Paris
+# Chaque heure UTC est aussi une heure pleine à Paris, y compris lors des
+# changements d'heure. Les libellés français sont calculés par le générateur.
+export TZ=UTC
 export PATH=/var/local/kmc/bin:/usr/sbin:/usr/bin:/sbin:/bin
 SS_PID=''
 KRON_PID=''
