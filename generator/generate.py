@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Génère l'image du dashboard Kindle (météo Bouliac + actus IA).
 
-Sortie : PNG 8 bits niveaux de gris, à la résolution native du Kindle Scribe
-(1860x2480, portrait), utilisable comme écran de veille.
+Sortie : PNG 8 bits niveaux de gris, à la résolution native du Kindle
+11e génération 2024 (1072x1448, 6 pouces, 300 ppi, portrait), utilisable comme écran de veille.
 
 Usage : python3 generate.py [--out DIR]
 Variables d'environnement facultatives :
@@ -29,8 +29,9 @@ TZ = ZoneInfo("Europe/Paris")
 # --- Configuration --------------------------------------------------------
 CITY = "Bouliac"
 LAT, LON = 44.8193, -0.50265
-WIDTH, HEIGHT = 1860, 2480          # Kindle Scribe, 300 ppi
-SCALE = 2                           # mise en page en 930x1240 px CSS
+WIDTH, HEIGHT = 1072, 1448          # Kindle 11e gén. (2024), 6", 300 ppi
+SCALE = 2                           # mise en page en 536x724 px CSS
+CSS_W, CSS_H = WIDTH // SCALE, HEIGHT // SCALE
 UPDATE_HOURS = (7, 12, 18)          # heures de mise à jour (Europe/Paris)
 
 TLDR_RSS = "https://tldr.tech/api/rss/ai"
@@ -228,23 +229,23 @@ def build_html(now, w, tldr_date, stories, headlines):
         pp = hourly["precipitation_probability"][i]
         hours_html += (
             f'<div class="h"><div class="hh">{times[i].hour:02d}h</div>'
-            f'{icon(hourly["weather_code"][i], hourly["is_day"][i], 40)}'
+            f'{icon(hourly["weather_code"][i], hourly["is_day"][i], 24, 1.8)}'
             f'<div class="ht">{round(hourly["temperature_2m"][i])}°</div>'
             f'<div class="hp">{pp if pp is not None else 0}&#8239;%</div></div>'
         )
 
-    tmin_all = min(daily["temperature_2m_min"][:6])
-    tmax_all = max(daily["temperature_2m_max"][:6])
+    tmin_all = min(daily["temperature_2m_min"][1:6])
+    tmax_all = max(daily["temperature_2m_max"][1:6])
     span = max(tmax_all - tmin_all, 1)
     days_html = ""
-    for i in range(1, 7):
+    for i in range(1, 6):
         d = dt.date.fromisoformat(daily["time"][i])
         lo, hi = daily["temperature_2m_min"][i], daily["temperature_2m_max"][i]
         left = (lo - tmin_all) / span * 100
         width = max((hi - lo) / span * 100, 6)
         days_html += (
             f'<div class="d"><div class="dn">{JOURS_COURTS[d.weekday()]}</div>'
-            f'{icon(daily["weather_code"][i], True, 44)}'
+            f'{icon(daily["weather_code"][i], True, 26, 1.8)}'
             f'<div class="dt"><b>{round(hi)}°</b> <span>{round(lo)}°</span></div>'
             f'<div class="bar"><i style="left:{left:.0f}%;width:{width:.0f}%"></i></div>'
             f'<div class="dp">{daily["precipitation_probability_max"][i] or 0}&#8239;% pluie</div></div>'
@@ -274,68 +275,64 @@ def build_html(now, w, tldr_date, stories, headlines):
 @font-face {{ font-family: Inter; src: url("file://{fonts}/Inter.ttf"); font-weight: 100 900; }}
 @font-face {{ font-family: News; src: url("file://{fonts}/Newsreader.ttf"); font-weight: 200 800; }}
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-html, body {{ width: 930px; height: 1240px; background: #fff; color: #000; overflow: hidden; }}
-body {{ font-family: Inter, sans-serif; padding: 40px 46px 30px; display: flex; flex-direction: column;
+html, body {{ width: {CSS_W}px; height: {CSS_H}px; background: #fff; color: #000; overflow: hidden; }}
+body {{ font-family: Inter, sans-serif; padding: 20px 22px 14px; display: flex; flex-direction: column;
        -webkit-font-smoothing: antialiased; }}
 .ico {{ display: block; }}
 header {{ display: flex; justify-content: space-between; align-items: flex-end;
-          padding-bottom: 14px; border-bottom: 4px solid #000; }}
-.kick {{ font-size: 15px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }}
-h1 {{ font-family: News; font-weight: 600; font-size: 50px; line-height: 1; margin-top: 6px;
-      letter-spacing: -.01em; }}
-.ed {{ text-align: right; font-size: 16px; color: #333; line-height: 1.45; }}
+          padding-bottom: 7px; border-bottom: 3px solid #000; }}
+.kick {{ font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }}
+h1 {{ font-family: News; font-weight: 600; font-size: 29px; line-height: 1; margin-top: 3px; letter-spacing: -.01em; }}
+.ed {{ text-align: right; font-size: 10.5px; color: #333; line-height: 1.4; }}
 .ed b {{ color: #000; font-weight: 700; }}
 
-.now {{ display: grid; grid-template-columns: auto 1fr auto; gap: 26px; align-items: center;
-        padding: 14px 0 12px; }}
-.temp {{ font-family: News; font-size: 128px; font-weight: 500; line-height: .85; letter-spacing: -.04em; }}
-.cond {{ font-family: News; font-size: 34px; font-weight: 600; line-height: 1.05; }}
-.sub {{ font-size: 17px; color: #333; margin-top: 8px; line-height: 1.5; }}
-.facts {{ border-left: 2px solid #000; padding-left: 20px; font-size: 17px; line-height: 1.75; }}
-.facts b {{ display: inline-block; min-width: 92px; font-weight: 700; }}
+.now {{ display: flex; gap: 14px; align-items: center; padding: 10px 0 6px; }}
+.temp {{ font-family: News; font-size: 70px; font-weight: 500; line-height: .85; letter-spacing: -.04em; }}
+.cond {{ font-family: News; font-size: 21px; font-weight: 600; line-height: 1.05; }}
+.sub {{ font-size: 11.5px; color: #222; margin-top: 5px; line-height: 1.4; }}
+.facts {{ display: flex; justify-content: space-between; font-size: 11.5px; padding: 5px 0 7px; color: #222; }}
+.facts b {{ font-weight: 700; color: #000; }}
 
 .hours {{ display: grid; grid-template-columns: repeat(6, 1fr); border-top: 2px solid #000;
           border-bottom: 2px solid #000; }}
-.h {{ display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 9px 0;
+.h {{ display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 5px 0;
       border-left: 1px solid #999; }}
 .h:first-child {{ border-left: 0; }}
-.hh {{ font-size: 15px; font-weight: 600; color: #333; }}
-.ht {{ font-size: 24px; font-weight: 700; }}
-.hp {{ font-size: 14px; color: #444; }}
+.hh {{ font-size: 10.5px; font-weight: 600; color: #333; }}
+.ht {{ font-size: 15px; font-weight: 700; }}
+.hp {{ font-size: 9.5px; color: #333; }}
 
-.days {{ display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; padding: 12px 0 16px; }}
-.d {{ display: flex; flex-direction: column; align-items: center; gap: 5px; }}
-.dn {{ font-size: 16px; font-weight: 700; }}
-.dt {{ font-size: 19px; }} .dt b {{ font-weight: 700; }} .dt span {{ color: #555; }}
-.bar {{ position: relative; width: 80%; height: 6px; background: #ddd; border-radius: 3px; }}
-.bar i {{ position: absolute; top: 0; bottom: 0; background: #000; border-radius: 3px; }}
-.dp {{ font-size: 13px; color: #444; }}
+.days {{ display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 7px 0 10px; }}
+.d {{ display: flex; flex-direction: column; align-items: center; gap: 2px; }}
+.dn {{ font-size: 11px; font-weight: 700; }}
+.dt {{ font-size: 13px; }} .dt b {{ font-weight: 700; }} .dt span {{ color: #444; }}
+.bar {{ position: relative; width: 78%; height: 4px; background: #ccc; border-radius: 2px; margin: 1px 0; }}
+.bar i {{ position: absolute; top: 0; bottom: 0; background: #000; border-radius: 2px; }}
+.dp {{ font-size: 9.5px; color: #333; }}
 
 .sec {{ display: flex; align-items: baseline; justify-content: space-between;
-        border-top: 4px solid #000; padding-top: 12px; margin-bottom: 4px; }}
-.sec h2 {{ font-family: News; font-size: 34px; font-weight: 600; letter-spacing: -.01em; }}
-.sec span {{ font-size: 15px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #333; }}
+        border-top: 3px solid #000; padding-top: 6px; }}
+.sec h2 {{ font-family: News; font-size: 20px; font-weight: 600; letter-spacing: -.01em; }}
+.sec span {{ font-size: 9.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #333; }}
 
-.st {{ display: grid; grid-template-columns: 38px 1fr; gap: 6px; padding: 8px 0;
+.st {{ display: grid; grid-template-columns: 18px 1fr; gap: 3px; padding: 6px 0;
        border-bottom: 1px solid #999; }}
-.num {{ font-family: News; font-size: 30px; font-weight: 600; line-height: 1; }}
-.stt {{ font-family: News; font-size: 23px; font-weight: 650; line-height: 1.18; }}
-.rt {{ font-family: Inter; font-size: 13px; font-weight: 600; color: #444; white-space: nowrap; }}
-.sts {{ font-size: 15.5px; line-height: 1.42; color: #222; margin-top: 4px;
+.num {{ font-family: News; font-size: 17px; font-weight: 600; line-height: 1.05; }}
+.stt {{ font-family: News; font-size: 14.5px; font-weight: 650; line-height: 1.2; }}
+.rt {{ font-family: Inter; font-size: 9px; font-weight: 600; color: #444; white-space: nowrap; }}
+.sts {{ font-size: 10.5px; line-height: 1.38; color: #111; margin-top: 2px;
         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
 
-.wire {{ margin-top: 12px; }}
-body > footer {{ flex-shrink: 0; }}
-.wire h3 {{ font-size: 14px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
-            padding-bottom: 6px; border-bottom: 2px solid #000; }}
-.hls {{ display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; }}
-.hl {{ padding: 8px 0; border-bottom: 1px solid #999; }}
-.hs {{ font-size: 12.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #444; }}
-.htl {{ font-family: News; font-size: 19px; font-weight: 550; line-height: 1.22; margin-top: 3px;
+.wire {{ margin-top: 8px; }}
+.wire h3 {{ font-size: 9.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+            padding-bottom: 3px; border-bottom: 2px solid #000; }}
+.hl {{ padding: 5px 0; border-bottom: 1px solid #999; }}
+.hs {{ font-size: 8.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #333; }}
+.htl {{ font-family: News; font-size: 13px; font-weight: 550; line-height: 1.2; margin-top: 1px;
         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
 
-footer {{ margin-top: auto; display: flex; justify-content: space-between; font-size: 13px;
-          color: #444; padding-top: 10px; border-top: 2px solid #000; }}
+footer {{ margin-top: auto; flex-shrink: 0; display: flex; justify-content: space-between; font-size: 8.5px;
+          color: #333; padding-top: 5px; border-top: 2px solid #000; }}
 </style></head><body>
 <header>
   <div><div class="kick">{CITY} · Gironde</div><h1>{date_txt}</h1></div>
@@ -343,36 +340,33 @@ footer {{ margin-top: auto; display: flex; justify-content: space-between; font-
 </header>
 
 <section class="now">
-  {icon(cur["weather_code"], cur["is_day"], 128, 1.3)}
+  {icon(cur["weather_code"], cur["is_day"], 74, 1.4)}
+  <div class="temp">{round(cur["temperature_2m"])}°</div>
   <div>
-    <div style="display:flex;align-items:flex-end;gap:22px">
-      <div class="temp">{round(cur["temperature_2m"])}°</div>
-      <div class="cond">{esc(label)}</div>
-    </div>
-    <div class="sub">Ressenti {round(cur["apparent_temperature"])}° · Vent {round(cur["wind_speed_10m"])}&#8239;km/h {wind_dir(cur["wind_direction_10m"])} · Humidité {cur["relative_humidity_2m"]}&#8239;%</div>
-  </div>
-  <div class="facts">
-    <div><b>Max / min</b>{round(daily["temperature_2m_max"][0])}° / {round(daily["temperature_2m_min"][0])}°</div>
-    <div><b>Pluie</b>{daily["precipitation_probability_max"][0] or 0}&#8239;% · {str(round(daily["precipitation_sum"][0], 1)).replace(".", ",")}&#8239;mm</div>
-    <div><b>Soleil</b>{sunrise} – {sunset}</div>
-    <div><b>Indice UV</b>{round(daily["uv_index_max"][0] or 0)}</div>
+    <div class="cond">{esc(label)}</div>
+    <div class="sub">Ressenti {round(cur["apparent_temperature"])}° · Vent {round(cur["wind_speed_10m"])}&#8239;km/h {wind_dir(cur["wind_direction_10m"])}<br>Humidité {cur["relative_humidity_2m"]}&#8239;% · UV {round(daily["uv_index_max"][0] or 0)}</div>
   </div>
 </section>
+<div class="facts">
+  <span><b>{round(daily["temperature_2m_max"][0])}°</b> max · <b>{round(daily["temperature_2m_min"][0])}°</b> min</span>
+  <span>Pluie <b>{daily["precipitation_probability_max"][0] or 0}&#8239;%</b> · {str(round(daily["precipitation_sum"][0], 1)).replace(".", ",")}&#8239;mm</span>
+  <span>Soleil {sunrise} – {sunset}</span>
+</div>
 <section class="hours">{hours_html}</section>
 <section class="days">{days_html}</section>
 
 <div class="sec"><h2>Intelligence artificielle</h2><span>TLDR AI · {tldr_txt}</span></div>
 <section>{stories_html}</section>
 
-<section class="wire"><h3>Le fil · TechCrunch, The Verge, MIT Tech Review</h3>
-  <div class="hls">{heads_html}</div></section>
+<section class="wire"><h3>Le fil · TechCrunch · The Verge · MIT Tech Review</h3>
+  <div>{heads_html}</div></section>
 
-<footer><span>Météo Open-Meteo · Actus TLDR AI, TechCrunch, The Verge, MIT Technology Review</span>
+<footer><span>Open-Meteo · TLDR AI · TechCrunch · The Verge · MIT Technology Review</span>
 <span>Prochaine mise à jour : {nxt:02d}h00</span></footer>
 <script>
 // Garde-fou : retire les derniers éléments tant que la page déborde.
 (function () {{
-  var limit = 1240 - 30;
+  var limit = {CSS_H} - 14;
   function over() {{ var f = document.querySelector("footer"); return f.getBoundingClientRect().bottom > limit; }}
   var pools = [".hl", ".st"];
   for (var p = 0; p < pools.length; p++) {{
@@ -419,7 +413,7 @@ def main():
     except Exception as e:  # noqa: BLE001
         print(f"[warn] TLDR: {e}", file=sys.stderr)
         tldr_date, stories = now.date(), []
-    headlines = get_headlines(6 if stories else 12)
+    headlines = get_headlines(3 if stories else 8)
 
     page = build_html(now, weather, tldr_date, stories, headlines)
     html_path = os.path.join(out, "dashboard.html")
