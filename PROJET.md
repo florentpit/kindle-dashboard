@@ -43,6 +43,37 @@ du Mac une fois en place.
   après redémarrage et l'affichage physique. Le téléchargement et le paquet
   préparés ne constituent pas encore un service autonome installé.
 
+### Dernier point de reprise
+
+- Publication GitHub Pages terminée et vérifiée directement : image valide
+  1072×1448 en niveaux de gris, SHA-256 concordant, calendrier accessible.
+  Le client `kindle/refresh.sh` a aussi réussi un téléchargement réel depuis
+  le Mac (avec `shasum` à la place de `sha256sum`).
+- Un redémarrage du Kindle a rétabli sa détection USB. La version compilée
+  de Shadow a pu retransférer `jb.sh`, mais sa fermeture de connexion a
+  généré une fausse déconnexion/reconnexion, **sans débranchement physique**
+  (confirmation de Florent). Ensuite : `libusb: no device`, avant le jailbreak.
+- Une correction du seul transport Mac est conservée dans
+  `patches/shadow-macos-usb.patch` : énumération sans ouvrir de handle pendant
+  l'attente du rebranchement et désactivation de l'auto-rattachement du pilote
+  avant fermeture sur Darwin. Hypothèse cohérente avec le problème libusb
+  https://github.com/libusb/libusb/issues/1923 ; **pas encore validée sur le Kindle**.
+- Source Shadow épinglée : `8019ed3f59a1176bf287291cd0bdaf18a177decb`.
+  Reconstruction : `sh scripts/build-shadow-macos.sh` (Go, pkg-config,
+  libusb >= 1.0.30 requis). Les tests Shadow passent avec la correction.
+- Binaire corrigé préparé : `.local/shadow/shadow-native-fixed`.
+- L'outil de contrôle UI a refusé l'accès à Terminal pour raisons de sécurité.
+  Florent lance donc lui-même :
+  `sudo sh /Users/florentpitoun/Dev/Kindle/scripts/jailbreak-local.sh`.
+  Suivre ensuite `.local/shadow/install-native.log` ; ne demander le
+  débranchement physique qu'après le message de transfert terminé.
+- **Action actuellement demandée à Florent** : redémarrage normal, câble
+  débranché, via Paramètres / Options de l'appareil / Redémarrer ; puis
+  rebrancher et relancer la commande ci-dessus. Il a contesté à juste titre
+  la répétition de la consigne de maintien 40 secondes : celle-ci vient de
+  la procédure générique de redémarrage forcé Amazon, pas d'une instruction
+  spécifique vérifiée pour le Basic 2024. Privilégier le menu si l'appareil répond.
+
 ## Matériel
 - **Kindle 11e génération, modèle 2024** (basique, couleur sauge), connecté
   en USB-C au Mac, reconnu en MTP comme « Amazon Kindle » (VID 0x1949, PID

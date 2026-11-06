@@ -1,0 +1,50 @@
+diff --git a/internal/usbdev/usbdev.go b/internal/usbdev/usbdev.go
+index 8fe0697..54c7966 100644
+--- a/internal/usbdev/usbdev.go
++++ b/internal/usbdev/usbdev.go
+@@ -6,6 +6,7 @@ import (
+ 	"context"
+ 	"errors"
+ 	"fmt"
++	"runtime"
+ 	"sort"
+ 	"strings"
+ 	"sync"
+@@ -106,14 +107,18 @@ func PIDList(pids []uint16) string {
+ func Present(vid uint16, pids []uint16) bool {
+ 	ctx := gousb.NewContext()
+ 	defer ctx.Close()
+-	devs, err := ctx.OpenDevices(matchDesc(vid, pids))
++	present := false
++	match := matchDesc(vid, pids)
++	_, err := ctx.OpenDevices(func(d *gousb.DeviceDesc) bool {
++		if match(d) {
++			present = true
++		}
++		return false // Enumeration only: never open or close a USB device here.
++	})
+ 	if err != nil {
+ 		return false
+ 	}
+-	for _, d := range devs {
+-		d.Close()
+-	}
+-	return len(devs) > 0
++	return present
+ }
+ 
+ func matchDesc(vid uint16, pids []uint16) func(*gousb.DeviceDesc) bool {
+@@ -404,6 +409,13 @@ func (t *Transport) Close() {
+ }
+ 
+ func (t *Transport) release() {
++	// Darwin reattaches by re-enumerating the whole device. In Shadow's
++	// transfer/replug sequence this creates a false unplug and can strand
++	// the Kindle's USB connection. The required physical replug will restore
++	// the driver instead. See libusb issue #1923.
++	if runtime.GOOS == "darwin" && t.dev != nil {
++		_ = t.dev.SetAutoDetach(false)
++	}
+ 	if t.intf != nil {
+ 		t.intf.Close()
+ 		t.intf = nil
