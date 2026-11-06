@@ -1,0 +1,46 @@
+name: Dashboard Kindle
+
+# Mises à jour pour le matin (7h), le midi (12h) et le soir (18h), heure de Paris.
+# Les crons GitHub sont en UTC : on lance à 5h30/6h30, 10h30/11h30 et 16h30/17h30 UTC
+# pour avoir une image fraîche avant chaque créneau, en heure d'hiver comme d'été.
+on:
+  schedule:
+    - cron: "30 5,6,10,11,16,17 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dashboard
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Dépendances
+        run: pip install Pillow
+
+      - name: Générer l'image
+        run: python generator/generate.py --out site
+
+      # Publie site/ sur la branche gh-pages (servie par GitHub Pages).
+      # Chaque publication est un commit : le dépôt reste « actif » et GitHub
+      # ne désactive pas le cron au bout de 60 jours.
+      - name: Publier
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: site
+          force_orphan: true
+          commit_message: "Dashboard ${{ github.run_number }}"
