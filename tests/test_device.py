@@ -19,12 +19,11 @@ spec.loader.exec_module(generate)
 class ScheduleTest(unittest.TestCase):
     def test_paris_dst(self):
         paris = ZoneInfo("Europe/Paris")
-        for date, utc_hours in [("2026-03-28", (6, 11, 17, 5, 10, 16)),
-                                ("2026-10-24", (5, 10, 16, 6, 11, 17))]:
+        for date, count in [("2026-03-28", 47), ("2026-10-24", 49)]:
             now = dt.datetime.fromisoformat(date).replace(tzinfo=paris)
             epochs = generate.refresh_schedule(now, days=2)
-            self.assertEqual([dt.datetime.fromtimestamp(t, dt.timezone.utc).hour
-                              for t in epochs], list(utc_hours))
+            self.assertEqual(len(epochs), count)
+            self.assertTrue(all(b - a == 3600 for a, b in zip(epochs, epochs[1:])))
             self.assertEqual(epochs, sorted(set(epochs)))
 
 

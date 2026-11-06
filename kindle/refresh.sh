@@ -28,7 +28,7 @@ HEADER=$(od -An -tx1 -N24 "$WORK/dashboard.png" | tr -d ' \n')
 
 if download schedule.txt && awk '
     length($0) != 10 || $0 ~ /[^0-9]/ || (NR > 1 && $0 <= prev) {bad=1}
-    {prev=$0} END {exit (bad || NR < 3 || NR > 60)}
+    {prev=$0} END {exit (bad || NR < 3 || NR > 400)}
 ' "$WORK/schedule.txt"; then
     mv "$WORK/schedule.txt" "$BASE/schedule.txt"
 fi

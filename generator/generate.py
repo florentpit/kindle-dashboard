@@ -33,14 +33,17 @@ LAT, LON = 44.8193, -0.50265
 WIDTH, HEIGHT = 1072, 1448          # Kindle 11e gén. (2024), 6", 300 ppi
 SCALE = 2                           # mise en page en 536x724 px CSS
 CSS_W, CSS_H = WIDTH // SCALE, HEIGHT // SCALE
-UPDATE_HOURS = (7, 12, 18)          # heures de mise à jour (Europe/Paris)
+UPDATE_HOURS = tuple(range(24))    # chaque heure pleine, Europe/Paris
 
 
 def refresh_schedule(now, days=14):
     """Instants UTC pour le Kindle, calculés avec les règles d'heure de Paris."""
-    return [int(dt.datetime.combine(now.date() + dt.timedelta(days=d),
-                                   dt.time(hour=h), TZ).timestamp())
-            for d in range(days) for h in UPDATE_HOURS]
+    start = dt.datetime.combine(now.date(), dt.time(), TZ)
+    end = dt.datetime.combine(now.date() + dt.timedelta(days=days), dt.time(), TZ)
+    # Parcourir les instants UTC évite les doublons au printemps et conserve
+    # les deux occurrences de 02h lors du passage à l'heure d'hiver.
+    return [t for t in range(int(start.timestamp()), int(end.timestamp()), 3600)
+            if dt.datetime.fromtimestamp(t, TZ).hour in UPDATE_HOURS]
 
 TLDR_RSS = "https://tldr.tech/api/rss/ai"
 FEEDS = [
@@ -222,8 +225,9 @@ def esc(s):
 def build_html(now, w, tldr_date, stories, headlines):
     cur, hourly, daily = w["current"], w["hourly"], w["daily"]
     label, _ = WMO.get(cur["weather_code"], ("—", ""))
-    edition = "du matin" if now.hour < 11 else ("de midi" if now.hour < 16 else "du soir")
-    nxt = next((h for h in UPDATE_HOURS if h > now.hour), UPDATE_HOURS[0])
+    edition = "horaire"
+    nxt = dt.datetime.fromtimestamp(
+        next(t for t in refresh_schedule(now, days=2) if t > now.timestamp()), TZ).hour
     date_txt = f"{JOURS[now.weekday()].capitalize()} {now.day} {MOIS[now.month - 1]}"
 
     sunrise = daily["sunrise"][0][-5:]

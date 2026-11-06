@@ -1,10 +1,9 @@
 name: Dashboard Kindle
 
-# Mises à jour pour le matin (7h), le midi (12h) et le soir (18h), heure de Paris.
-# Génération une demi-heure avant l'affichage, avec changement d'heure automatique.
+# Génération horaire, quinze minutes avant l'affichage à chaque heure pleine.
 on:
   schedule:
-    - cron: "30 6,11,17 * * *"
+    - cron: "45 * * * *"
       timezone: Europe/Paris
   workflow_dispatch:
   push:
