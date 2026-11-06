@@ -6,6 +6,43 @@ Bouliac (33270) et les dernières actus IA (TLDR AI + TechCrunch/The Verge/MIT
 Tech Review), mis à jour 3×/jour (7h, 12h, 18h, heure de Paris), sans dépendre
 du Mac une fois en place.
 
+## Reprise du 6 novembre — état réel de l'installation
+
+- Dashboard régénéré et contrôlé visuellement, toujours en 1072×1448 gris.
+- Planification cloud corrigée : trois générations à 6h30, 11h30 et 17h30,
+  `timezone: Europe/Paris`, pour les affichages prévus à 7h, 12h et 18h.
+- Le générateur publie aussi `schedule.txt` (14 jours d'instants UTC calculés
+  en heure de Paris) et `dashboard.sha256`.
+- Client de téléchargement atomique : `kindle/refresh.sh`. Vérification du
+  SHA-256 et de l'en-tête PNG/résolution avant remplacement de l'image ;
+  conservation du cache en cas d'échec ; dessin uniquement en veille.
+- Quatre tests passent : téléchargement valide, image tronquée, page HTML
+  avec somme correcte, changements d'heure été/hiver.
+- Écran de veille retenu : **chengandre/kindle-custom-screensaver v0.6.0**,
+  testé en amont sur Kindle 11 / 5.19.5. Paquet vérifié par SHA-256 et préparé
+  dans `.local/device/` avec `sh scripts/prepare-device.sh`.
+- **Jailbreak non terminé** : Shadow v1.0.2 a détecté le bon appareil et
+  transféré `jb.sh`, puis son binaire Mac a planté dans
+  `libusb_release_interface` après la reconnexion, avant `chain.Fire`.
+  Aucun envoi du payload d'exécution n'a été observé.
+- Shadow a ensuite été compilé depuis sa source avec Go 1.27.3 et la
+  bibliothèque libusb Homebrew 1.0.30. Ses tests cmd/shadow, usbdev, mtp et
+  chain passent. Binaire : `.local/shadow/shadow-native`.
+- Le second essai n'a trouvé aucun Kindle en USB et s'est arrêté proprement
+  après attente. La correction du plantage n'a donc pas encore pu être
+  vérifiée sur le matériel.
+- L'utilisateur a confirmé de nouveau **5.19.5 (4794270058)**.
+- Journaux locaux : `.local/shadow/install.log` et `install-native.log`.
+  `.local/` est ignoré par Git.
+- **Prochain prérequis** : obtenir une connexion USB de données stable,
+  puis relancer Shadow avec les droits administrateur via la fenêtre macOS.
+  Ne demander le débranchement/rebranchement qu'après le message de Shadow.
+- **Encore à faire après le jailbreak** : transférer le paquet, exécuter
+  `Diagnostic Dashboard` pour identifier les interfaces powerd réelles,
+  installer et tester le réveil RTC/rafraîchissement automatique, la reprise
+  après redémarrage et l'affichage physique. Le téléchargement et le paquet
+  préparés ne constituent pas encore un service autonome installé.
+
 ## Matériel
 - **Kindle 11e génération, modèle 2024** (basique, couleur sauge), connecté
   en USB-C au Mac, reconnu en MTP comme « Amazon Kindle » (VID 0x1949, PID
@@ -69,12 +106,7 @@ du Mac une fois en place.
      fait : désactiver les mises à jour auto, installer un gestionnaire de
      paquets (KPM), et éventuellement un accès SSH/réseau par Wi-Fi pour ne
      plus dépendre d'un câble.
-   - **Point de vigilance** : toute manipulation de ce type modifie le
-     logiciel interne de l'appareil en dehors du cadre prévu par Amazon et
-     peut annuler la garantie ou rendre l'appareil instable si une étape
-     est mal suivie. Mieux vaut suivre pas à pas la documentation officielle
-     de la méthode retenue (README du dépôt GitHub correspondant) plutôt
-     qu'une reconstruction a posteriori.
+
 2. **Identifier comment personnaliser l'écran de veille** une fois le
    jailbreak fait : kindlemodding.org mentionne la possibilité de changer
    les écrans de veille par défaut, mais le mécanisme précis (dossier,
