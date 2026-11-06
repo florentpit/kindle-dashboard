@@ -195,7 +195,10 @@ def get_headlines(n=6):
             when = parse_date(e.findtext("pubDate") or e.findtext(f"{atom}published")
                               or e.findtext(f"{atom}updated"))
             if title and when:
-                items.append({"source": source, "title": title, "when": when})
+                summary = clean(e.findtext("description") or e.findtext(f"{atom}summary")
+                                or e.findtext(f"{atom}content") or "")
+                items.append({"source": source, "title": title, "when": when,
+                              "summary": summary})
     items.sort(key=lambda x: x["when"], reverse=True)
     # max 3 titres par source pour garder de la variété
     out, per = [], {}
@@ -225,9 +228,6 @@ def esc(s):
 def build_html(now, w, tldr_date, stories, headlines):
     cur, hourly, daily = w["current"], w["hourly"], w["daily"]
     label, _ = WMO.get(cur["weather_code"], ("—", ""))
-    edition = "horaire"
-    nxt = dt.datetime.fromtimestamp(
-        next(t for t in refresh_schedule(now, days=2) if t > now.timestamp()), TZ).hour
     date_txt = f"{JOURS[now.weekday()].capitalize()} {now.day} {MOIS[now.month - 1]}"
 
     sunrise = daily["sunrise"][0][-5:]
@@ -257,23 +257,21 @@ def build_html(now, w, tldr_date, stories, headlines):
             f'<div class="dp">{daily["precipitation_probability_max"][i] or 0}&#8239;% pluie</div></div>'
         )
 
-    stories_html = ""
-    for k, s in enumerate(stories, 1):
-        meta = ""
-        stories_html += (
-            f'<div class="st"><div class="num">{k}</div><div>'
-            f'<div class="stt">{esc(s["title"])} {meta}</div>'
-            f'<div class="sts">{esc(s["summary"])}</div></div></div>'
-        )
-
-    heads_html = ""
+    display_stories = [dict(s, source="TLDR AI") for s in stories[:2]]
     for it in headlines:
-        heads_html += (
-            f'<div class="hl"><div class="hs">{esc(it["source"])} · {ago(it["when"], now)}</div>'
-            f'<div class="htl">{esc(it["title"])}</div></div>'
+        if len(display_stories) == 3:
+            break
+        if any(s["title"].casefold() == it["title"].casefold() for s in display_stories):
+            continue
+        display_stories.append(it)
+    stories_html = ""
+    for s in display_stories:
+        stories_html += (
+            f'<article class="st"><div class="story-top">'
+            f'<div class="stt">{esc(s["title"])}</div>'
+            f'<span class="source">{esc(s["source"])}</span></div>'
+            f'<div class="sts">{esc(s.get("summary", ""))}</div></article>'
         )
-
-    tldr_txt = f"{JOURS[tldr_date.weekday()]} {tldr_date.day} {MOIS[tldr_date.month - 1]}"
     fonts = os.path.join(HERE, "fonts")
 
     return f"""<!doctype html><html lang="fr"><head><meta charset="utf-8">
@@ -282,7 +280,7 @@ def build_html(now, w, tldr_date, stories, headlines):
 @font-face {{ font-family: News; src: url("file://{fonts}/Newsreader.ttf"); font-weight: 200 800; }}
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
 html, body {{ width: {CSS_W}px; height: {CSS_H}px; background: #fff; color: #000; overflow: hidden; }}
-body {{ font-family: Inter, sans-serif; padding: 20px 22px 14px; display: flex; flex-direction: column;
+body {{ font-family: Inter, sans-serif; padding: 20px 22px 10px; display: flex; flex-direction: column;
        -webkit-font-smoothing: antialiased; }}
 .ico {{ display: block; }}
 header {{ display: flex; justify-content: space-between; align-items: flex-end;
@@ -316,34 +314,23 @@ h1 {{ font-family: News; font-weight: 600; font-size: 33px; line-height: 1; marg
 .dt {{ font-size: 22px; }} .dt b {{ font-weight: 700; }} .dt span {{ color: #333; }}
 .dp {{ font-size: 15px; color: #222; }}
 
-.sec {{ display: flex; align-items: baseline; justify-content: space-between;
-        border-top: 3px solid #000; padding-top: 6px; }}
-.sec h2 {{ font-family: News; font-size: 26px; font-weight: 600; letter-spacing: -.01em; }}
-.sec span {{ font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #222; }}
+.sec {{ border-top: 2px solid #000; padding: 7px 0 1px; }}
+.sec h2 {{ font-family: Inter; font-size: 15px; font-weight: 750; letter-spacing: .07em;
+           text-transform: uppercase; }}
 
-.st {{ display: grid; grid-template-columns: 22px 1fr; gap: 5px; padding: 7px 0;
+.st {{ padding: 8px 0;
        border-bottom: 1px solid #999; }}
-.num {{ font-family: News; font-size: 24px; font-weight: 600; line-height: 1.05; }}
+.st:last-child {{ border-bottom: 0; }}
+.story-top {{ display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }}
+.source {{ font-size: 12px; font-weight: 650; color: #333; white-space: nowrap; }}
 .stt {{ font-family: News; font-size: 23px; font-weight: 650; line-height: 1.12;
         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
-.rt {{ font-family: Inter; font-size: 9px; font-weight: 600; color: #444; white-space: nowrap; }}
 .sts {{ font-size: 18px; line-height: 1.25; color: #111; margin-top: 3px;
         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
-
-.wire {{ margin-top: 8px; }}
-.wire h3 {{ font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-            padding-bottom: 3px; border-bottom: 2px solid #000; }}
-.hl {{ padding: 5px 0; border-bottom: 1px solid #999; }}
-.hs {{ font-size: 13px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; color: #222; }}
-.htl {{ font-family: News; font-size: 21px; font-weight: 550; line-height: 1.15; margin-top: 2px;
-        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }}
-
-footer {{ margin-top: auto; flex-shrink: 0; display: flex; justify-content: space-between; font-size: 12px;
-          color: #333; padding-top: 5px; border-top: 2px solid #000; }}
 </style></head><body>
 <header>
   <div><div class="kick">{CITY} · Gironde</div><h1>{date_txt}</h1></div>
-  <div class="ed"><b>Édition {edition}</b><br>Mis à jour à {now:%H:%M}</div>
+  <div class="ed">Mis à jour<br><b>{now:%H:%M}</b></div>
 </header>
 
 <section class="now">
@@ -362,24 +349,21 @@ footer {{ margin-top: auto; flex-shrink: 0; display: flex; justify-content: spac
 <section class="hours">{hours_html}</section>
 <section class="days">{days_html}</section>
 
-<div class="sec"><h2>Actualités IA</h2><span>TLDR AI · {tldr_txt}</span></div>
+<div class="sec"><h2>Actualité IA</h2></div>
 <section>{stories_html}</section>
-
-<section class="wire"><h3>Le fil</h3>
-  <div>{heads_html}</div></section>
-
-<footer><span>Open-Meteo · TLDR AI</span>
-<span>Actualisation : {nxt:02d}h00</span></footer>
 <script>
-// Garde-fou : retire les derniers éléments tant que la page déborde.
+// Préserve les trois actualités et les grandes polices, même si les titres sont longs.
 function fitPage() {{
-  var limit = {CSS_H} - 14;
-  function over() {{ var f = document.querySelector("footer"); return f.getBoundingClientRect().bottom > limit; }}
-  var pools = [".hl", ".st"];
-  for (var p = 0; p < pools.length; p++) {{
-    var els = document.querySelectorAll(pools[p]);
-    for (var i = els.length - 1; i >= 1 && over(); i--) els[i].remove();
+  var limit = {CSS_H} - 10;
+  function over() {{
+    var els = document.querySelectorAll(".st");
+    return els.length && els[els.length - 1].getBoundingClientRect().bottom > limit;
   }}
+  var pools = [".sts", ".stt"];
+  for (var p = 0; p < pools.length && over(); p++) {{
+    document.querySelectorAll(pools[p]).forEach(function (el) {{ el.style.webkitLineClamp = "1"; }});
+  }}
+  document.documentElement.dataset.layoutOverflow = over() ? "1" : "0";
 }}
 document.fonts.ready.then(fitPage);
 window.addEventListener("load", fitPage);
