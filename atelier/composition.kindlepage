@@ -86,7 +86,7 @@
     },
     {
       "alignment" : "left",
-      "articleCount" : 4,
+      "articleCount" : 3,
       "background" : 1,
       "bold" : false,
       "city" : "Bouliac",
@@ -94,7 +94,7 @@
       "cornerRadius" : 0,
       "dateFormat" : "EEEE d MMMM",
       "fontName" : "Inter",
-      "fontSize" : 30,
+      "fontSize" : 40,
       "hasBackground" : false,
       "height" : 586,
       "hidden" : false,
@@ -326,7 +326,7 @@
     },
     "newsFetchedAt" : {
       "https:\/\/techcrunch.com\/category\/artificial-intelligence\/feed\/" : 815695623.835498,
-      "https:\/\/tldr.tech\/api\/rss\/ai" : 815856887.902793
+      "https:\/\/tldr.tech\/api\/rss\/ai" : 815915121.991257
     },
     "weather" : {
       "Bouliac|celsius" : {
@@ -398,7 +398,7 @@
     }
   },
   "templateID" : "original",
-  "updatedAt" : 815695739.45033,
+  "updatedAt" : 815915169.491663,
   "version" : 1,
   "width" : 1072
 }
