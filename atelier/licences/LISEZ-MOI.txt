@@ -1,0 +1,1 @@
+Les composants système suivent les licences de macOS. Les sources et versions des outils sont dans components.json. Les notices de FBInk détaillent les composants intégrés. Le binaire Shadow et certains paquets sont destinés à cet usage local : compléter l’audit des licences et fournir les sources correspondantes avant redistribution publique. Aucune clé privée n’est embarquée.

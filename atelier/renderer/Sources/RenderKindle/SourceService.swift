@@ -1,0 +1,141 @@
+import Foundation
+#if canImport(FoundationXML)
+import FoundationXML
+#endif
+
+enum SourceService {
+    static let presetURLs: Set<String> = ["https://www.lemonde.fr/rss/une.xml", "https://techcrunch.com/category/artificial-intelligence/feed/", "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", "https://www.technologyreview.com/topic/artificial-intelligence/feed", "https://tldr.tech/api/rss/ai"]
+    static func data(_ url: URL) async throws -> Data {
+        guard url.scheme == "https" else { throw PageError.invalid("La source doit utiliser HTTPS.") }
+        var request = URLRequest(url: url, timeoutInterval: 25)
+        request.setValue("AtelierKindle/0.1", forHTTPHeaderField: "User-Agent")
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let response = response as? HTTPURLResponse, (200..<300).contains(response.statusCode), response.url?.scheme == "https", data.count < 8_000_000 else {
+            throw PageError.invalid("La source ne répond pas correctement : \(url.host ?? "").")
+        }
+        return data
+    }
+
+    static func fetch(for page: KindlePage) async throws -> SourceSnapshot {
+        var result = SourceSnapshot()
+        for block in page.blocks where !block.hidden {
+            if block.kind == .weather {
+                let key = "\(block.city)|\(block.unit)"
+                guard result.weather[key] == nil else { continue }
+                let url = try WeatherService.url(block: block, timezone: page.schedule.timezone)
+                result.weather[key] = try WeatherService.decode(try await data(url), timezone: page.schedule.timezone)
+            } else if block.kind == .news, result.news[block.sourceURL] == nil {
+                let feed = try await articles(at: block.sourceURL)
+                result.news[block.sourceURL] = Array(feed.prefix(12))
+                if result.newsFetchedAt == nil { result.newsFetchedAt = [:] }; result.newsFetchedAt?[block.sourceURL] = Date()
+            }
+        }
+        result.example = false; result.fetchedAt = Date()
+        return result
+    }
+
+    static func parseFeed(_ bytes: Data) -> [NewsItem] {
+        let reader = FeedReader(); let parser = XMLParser(data: bytes); parser.delegate = reader
+        parser.shouldResolveExternalEntities = false
+        return parser.parse() ? reader.items : []
+    }
+
+    static func articles(at address: String) async throws -> [NewsItem] {
+        guard let url = URL(string: address.trimmingCharacters(in: .whitespacesAndNewlines)), url.scheme == "https", url.host != nil else {
+            throw PageError.invalid("Indiquez une adresse HTTPS de site ou de flux RSS / Atom.")
+        }
+        if url.host?.lowercased()=="tldr.tech",url.path.hasPrefix("/ai/") {
+            let stories=TLDRReader.stories(in:String(decoding:try await data(url),as:UTF8.self),edition:url)
+            guard !stories.isEmpty else { throw PageError.invalid("Aucun article lisible dans cette édition TLDR.") };return stories
+        }
+        let bytes = try await data(url)
+        let direct = parseFeed(bytes)
+        if url.host?.lowercased()=="tldr.tech",url.path=="/api/rss/ai" {
+            guard let address=direct.first?.link,let edition=URL(string:address),edition.scheme=="https",edition.host?.lowercased()=="tldr.tech",edition.path.hasPrefix("/ai/") else { throw PageError.invalid("Le flux TLDR ne contient pas d’édition quotidienne valide.") }
+            let stories=TLDRReader.stories(in:String(decoding:try await data(edition),as:UTF8.self),edition:edition)
+            guard !stories.isEmpty else { throw PageError.invalid("Les résumés de cette édition TLDR sont indisponibles.") };return stories
+        }
+        if !direct.isEmpty { return direct }
+        let candidates = discoveredFeeds(in: String(decoding: bytes, as: UTF8.self), base: url)
+        for feed in candidates.prefix(4) {
+            if let bytes = try? await data(feed) {
+                let articles = parseFeed(bytes)
+                if !articles.isEmpty { return articles }
+            }
+        }
+        throw PageError.invalid("Cette adresse ne fournit pas de flux RSS / Atom lisible. Collez l’adresse du flux de ce média ; le texte disponible dépend de ce qu’il publie.")
+    }
+
+    static func discoveredFeeds(in html: String, base: URL) -> [URL] {
+        guard let tags = try? NSRegularExpression(pattern: "<link\\b[^>]*>", options: .caseInsensitive),
+              let attributes = try? NSRegularExpression(pattern: "([a-zA-Z:-]+)\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s>]+))") else { return [] }
+        var result: [URL] = []
+        for tag in tags.matches(in: html, range: NSRange(html.startIndex..., in: html)) {
+            guard let range = Range(tag.range, in: html) else { continue }
+            let text = String(html[range]); var values: [String: String] = [:]
+            for match in attributes.matches(in: text, range: NSRange(text.startIndex..., in: text)) {
+                guard let key = Range(match.range(at:1),in:text) else { continue }
+                for index in 2...4 { if let value = Range(match.range(at:index),in:text) { values[String(text[key]).lowercased()] = String(text[value]); break } }
+            }
+            if ["application/rss+xml","application/atom+xml","application/rdf+xml"].contains(values["type"]?.lowercased() ?? ""),
+               let href = values["href"], let url = URL(string: href.replacingOccurrences(of: "&amp;", with: "&"), relativeTo: base)?.absoluteURL, url.scheme == "https", !result.contains(url) { result.append(url) }
+        }
+        return result
+    }
+
+    static func geocode(_ city: String) async throws -> (String, Double, Double, String) {
+        var c = URLComponents(string: "https://geocoding-api.open-meteo.com/v1/search")!
+        c.queryItems = [.init(name: "name", value: city), .init(name: "count", value: "1"), .init(name: "language", value: "fr")]
+        let json = try JSONSerialization.jsonObject(with: await data(c.url!)) as? [String: Any]
+        guard let results = json?["results"] as? [[String: Any]], let first = results.first,
+              let name = first["name"] as? String, let lat = first["latitude"] as? Double, let lon = first["longitude"] as? Double else {
+            throw PageError.invalid("Ville introuvable. Essayez un nom plus précis.")
+        }
+        return (name, lat, lon, first["admin2"] as? String ?? first["admin1"] as? String ?? "")
+    }
+}
+
+final class FeedReader: NSObject, XMLParserDelegate {
+    var items: [NewsItem] = []
+    private var inside = false
+    private var stack: [String] = []
+    private var values: [String: String] = [:]
+    private var link = ""
+    func parser(_ parser: XMLParser, didStartElement name: String, namespaceURI: String?, qualifiedName: String?, attributes: [String: String]) {
+        stack.append(name)
+        if name == "item" || name == "entry" { inside = true; values = [:]; link = "" }
+        if inside && name == "link", let href = attributes["href"], attributes["rel"] == nil || attributes["rel"] == "alternate" { link = href }
+        if inside && name == "br" { append(" ") }
+    }
+    private func append(_ string: String) {
+        guard inside, let key = stack.last(where: { ["title","description","summary","content:encoded","content","link"].contains($0) }) else { return }
+        // Bounded buffers, including feeds supplying full content.
+        if (values[key]?.count ?? 0) < 100_000 { values[key, default: ""] += string }
+    }
+    func parser(_ parser: XMLParser, foundCharacters string: String) { append(string) }
+    func parser(_ parser: XMLParser, foundCDATA CDATABlock: Data) { append(String(decoding: CDATABlock, as: UTF8.self)) }
+    func parser(_ parser: XMLParser, didEndElement name: String, namespaceURI: String?, qualifiedName: String?) {
+        if name == "item" || name == "entry" {
+            let title = Self.clean(values["title"] ?? "")
+            let summaries = ["content:encoded","content","description","summary"].compactMap { values[$0].map(Self.clean) }
+            if !title.isEmpty {
+                items.append(.init(title: title, summary: String((summaries.max(by: { $0.count < $1.count }) ?? "").prefix(8000)), link: (link.isEmpty ? values["link"] ?? "" : link).trimmingCharacters(in: .whitespacesAndNewlines)))
+            }
+            inside = false
+        }
+        if !stack.isEmpty { stack.removeLast() }
+    }
+    static func clean(_ text: String) -> String {
+        var result = text.replacingOccurrences(of: "(?is)<(script|style)[^>]*>.*?</\\1>", with: "", options: .regularExpression)
+            .replacingOccurrences(of: "<[^>]+>", with: " ", options: .regularExpression)
+        for (entity, value) in ["&amp;":"&", "&quot;":"\"", "&#39;":"’", "&apos;":"’", "&nbsp;":" ", "&lt;":"<", "&gt;":">", "&rsquo;":"’", "&lsquo;":"‘", "&eacute;":"é", "&agrave;":"à", "&mdash;":"—", "&ndash;":"–"] { result = result.replacingOccurrences(of: entity, with: value) }
+        if let regex = try? NSRegularExpression(pattern: "&#(x[0-9a-fA-F]+|[0-9]+);") {
+            for match in regex.matches(in: result, range: NSRange(result.startIndex..., in: result)).reversed() {
+                guard let range = Range(match.range, in: result), let digits = Range(match.range(at: 1), in: result) else { continue }
+                let value = String(result[digits]); let number = value.hasPrefix("x") ? UInt32(value.dropFirst(), radix:16) : UInt32(value)
+                if let number, let scalar = UnicodeScalar(number) { result.replaceSubrange(range, with: String(scalar)) }
+            }
+        }
+        return result.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
