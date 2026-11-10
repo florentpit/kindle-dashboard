@@ -1,8 +1,13 @@
 name: Atelier Kindle
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '43 * * * *'
   workflow_dispatch:
+    inputs:
+      authorization_probe:
+        description: Vérifier l’autorisation du Kindle sans publier
+        type: boolean
+        default: false
   push:
     branches: ["main"]
 permissions:
@@ -10,20 +15,35 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: atelier-kindle-pages-${{ github.event_name == 'workflow_dispatch' && inputs.authorization_probe && 'authorization' || 'edition' }}
+  cancel-in-progress: false
 jobs:
+  authorization:
+    if: github.event_name == 'workflow_dispatch' && inputs.authorization_probe
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'Autorisation de déclenchement vérifiée'
   render:
+    if: github.event_name != 'workflow_dispatch' || !inputs.authorization_probe
     runs-on: macos-15
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: Identifier le compilateur
+        id: compiler
+        run: |
+          { swift --version; xcodebuild -version; xcrun --show-sdk-version; } | shasum -a 256 | awk '{print "key=" $1}' >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: atelier/renderer/.build
+          key: kindle-renderer-${{ runner.os }}-${{ runner.arch }}-${{ steps.compiler.outputs.key }}-${{ hashFiles('atelier/renderer/**') }}
       - name: Compiler le moteur natif
         run: swift build -c release --package-path atelier/renderer
       - name: Produire l’édition
         run: |
           atelier/renderer/.build/release/RenderKindle atelier/composition.kindlepage site
           cp atelier/deployment.txt site/deployment.txt
+          date -u +%s > site/generated-at.txt
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

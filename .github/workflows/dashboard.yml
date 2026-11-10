@@ -1,12 +1,9 @@
 name: Dashboard Kindle
 
 # Génération horaire, quinze minutes avant l'affichage à chaque heure pleine.
+# Ancien générateur conservé pour un lancement manuel ; Atelier gère les éditions.
 on:
-  schedule:
-    - cron: "45 * * * *"
   workflow_dispatch:
-  push:
-    branches: [main]
 
 permissions:
   contents: write
