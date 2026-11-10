@@ -60,6 +60,15 @@ enum WeatherService {
 }
 
 enum WeatherText {
+    static func updateTime(_ updated:Date?,relativeTo now:Date,timezone:String)->String {
+        guard let updated else {return "—"}
+        let zone=TimeZone(identifier:timezone) ?? TimeZone(secondsFromGMT:0)!
+        var calendar=Calendar(identifier:.gregorian);calendar.timeZone=zone
+        let formatter=DateFormatter();formatter.locale=Locale(identifier:"fr_FR");formatter.timeZone=zone
+        formatter.dateFormat=calendar.isDate(updated,inSameDayAs:now) ? "HH:mm":"dd/MM HH:mm"
+        return formatter.string(from:updated)
+    }
+
     static func number(_ value:Double?,digits:Int=0)->String {
         guard let value,value.isFinite else { return "—" }
         return String(format:digits==0 ? "%.0f":"%.1f",locale:Locale(identifier:"fr_FR"),value)

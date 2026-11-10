@@ -93,10 +93,10 @@
       "clockFormat" : "HH:mm",
       "cornerRadius" : 0,
       "dateFormat" : "EEEE d MMMM",
-      "fontName" : "Inter",
+      "fontName" : "Newsreader",
       "fontSize" : 40,
       "hasBackground" : false,
-      "height" : 586,
+      "height" : 634.1156332891246,
       "hidden" : false,
       "id" : "8DF40577-0EE7-4A45-B117-49841F023287",
       "imageBrightness" : 0,
@@ -106,7 +106,7 @@
       "italic" : false,
       "kind" : "news",
       "latitude" : 44.8193,
-      "lineSpacing" : 5,
+      "lineSpacing" : 9.450974770642201,
       "locked" : false,
       "longitude" : -0.50265,
       "opacity" : 1,
@@ -197,208 +197,145 @@
   },
   "sources" : {
     "example" : false,
-    "fetchedAt" : 815690380.534399,
+    "fetchedAt" : 815998917.566325,
     "news" : {
-      "https:\/\/techcrunch.com\/category\/artificial-intelligence\/feed\/" : [
-        {
-          "link" : "https:\/\/techcrunch.com\/2026\/11\/06\/hundreds-of-artex-ai-hacking-tools-found-publicly-exposed-to-the-web\/",
-          "summary" : "Security researchers found hundreds of servers hosting the penetration testing tool Artex exposed to the internet, allowing anyone access to the hacking tool.",
-          "title" : "Hundreds of Artex AI hacking tools found publicly exposed to the web"
-        },
-        {
-          "link" : "https:\/\/techcrunch.com\/2026\/11\/06\/meta-introduces-spaces-a-new-way-to-collaborate-with-your-muse-agent\/",
-          "summary" : "Meta's Muse agents continue to get new features and integrations. Spaces promises to be a new way to interact with the AI helpers.",
-          "title" : "Meta introduces Spaces, a new way to collaborate with your Muse agent"
-        },
-        {
-          "link" : "https:\/\/techcrunch.com\/podcast\/how-a-blue-wave-midterm-might-reshape-the-ai-industry\/",
-          "summary" : "Democrats’ historic victories in this week’s U.S. midterm elections could also transform the tech industry. The public voted on 41 data center-related ballot measures on Tuesday — in all but one, the majority voted to impose more restrictions on data center development. And even when data centers weren’t on the ballot directly, they were a […]",
-          "title" : "How a Blue Wave midterm might reshape the AI industry"
-        },
-        {
-          "link" : "https:\/\/techcrunch.com\/video\/after-the-midterms-is-the-ai-industry-in-for-a-rough-two-years\/",
-          "summary" : "Democrats’ historic victories in this week’s U.S. midterm elections could also transform the tech industry. The public voted on 41 data center-related ballot measures on Tuesday — in all but one, the majority voted to impose more restrictions on data center development. And even when data centers weren’t on the ballot directly, they were a […]",
-          "title" : "After the midterms, is the AI industry in for a rough two years?"
-        },
-        {
-          "link" : "https:\/\/techcrunch.com\/2026\/11\/06\/ramp-data-shows-ai-spending-stalling-just-as-anthropic-nears-its-ipo\/",
-          "summary" : "AI usage keeps climbing, but spending has stalled. Price cuts and smarter cost controls among the biggest spenders could challenge investor assumptions about AI hypergrowth.",
-          "title" : "Ramp data shows AI spending stalling just as Anthropic nears its IPO"
-        },
-        {
-          "link" : "https:\/\/techcrunch.com\/2026\/11\/06\/after-blocking-muse-amazon-now-lets-users-text-alexa-to-help-them-shop\/",
-          "summary" : "Amazon said that the feature will roll out to millions of users in coming weeks.",
-          "title" : "After blocking Muse, Amazon now lets users text Alexa to help them shop"
-        },
-        {
-          "link" : "https:\/\/techcrunch.com\/2026\/11\/06\/underdog-shows-off-a-32mb-speech-model-in-new-demo\/",
-          "summary" : "Despite its small size, Underdog's new model can generate both speech and music.",
-          "title" : "Underdog shows off a 32MB speech model in new demo"
-        },
-        {
-          "link" : "https:\/\/techcrunch.com\/2026\/11\/06\/physicl-raises-10m-to-make-the-digital-world-real-enough-for-robots\/",
-          "summary" : "Physicl is trying to solve the sim-to-real gap with a pipeline originally built to market goods online.",
-          "title" : "Physicl raises $10M to make the digital world real enough for robots"
-        },
-        {
-          "link" : "https:\/\/techcrunch.com\/2026\/11\/05\/palo-alto-networks-in-talks-to-buy-ai-agent-security-startup-clutch-for-500m\/",
-          "summary" : "Clutch, backed by Lightspeed and SignalFire, was last valued at $85 million, according to a source.",
-          "title" : "Palo Alto Networks in talks to buy AI agent security startup Clutch for $500M"
-        },
-        {
-          "link" : "https:\/\/techcrunch.com\/2026\/11\/05\/airbnb-says-its-launching-an-ai-travel-agent-in-the-first-half-of-2027\/",
-          "summary" : "Airbnb says its upcoming AI agent will help travelers plan trips, compare options, manage bookings, and get assistance throughout their stay.",
-          "title" : "Airbnb says it’s launching an AI travel agent in the first half of 2027"
-        },
-        {
-          "link" : "https:\/\/techcrunch.com\/2026\/11\/05\/meta-says-us-users-can-now-video-chat-with-their-muse-ai-avatar\/",
-          "summary" : "Meta's AI agent can now take calls as a customizable animated avatar, ahead of the launch of a Tamagotchi-like wearable designed to bring Muse to life.",
-          "title" : "Meta says US users can now video chat with their Muse AI avatar"
-        },
-        {
-          "link" : "https:\/\/techcrunch.com\/2026\/11\/05\/metas-warns-that-election-backlash-against-data-centers-could-make-ai-expansion-harder\/",
-          "summary" : "Meta warns that growing political opposition to data centers could threaten future AI investments, as communities push back against massive infrastructure projects.",
-          "title" : "Meta warns that election backlash against data centers could make AI expansion harder"
-        }
-      ],
       "https:\/\/tldr.tech\/api\/rss\/ai" : [
         {
-          "link" : "https:\/\/openai.com\/index\/introducing-gpt-6-cyber\/?utm_source=tldrai",
-          "summary" : "OpenAI introduced GPT-6 Cyber, a cybersecurity model designed to identify and validate exploitable vulnerabilities while staying within researcher-defined boundaries.",
-          "title" : "GPT-6 Cyber"
+          "link" : "https:\/\/techcrunch.com\/2026\/11\/06\/openai-reportedly-raises-an-additional-11-billion-at-a-1-25-trillion-valuation\/?utm_source=tldrai",
+          "summary" : "OpenAI reportedly secured $11 billion in a new funding round at a $1.25 trillion valuation, with the round potentially reaching $20 billion before closing. The amount fell short of its previously reported $30 billion fundraising target, amid growing investor uncertainty around AI valuations.",
+          "title" : "OpenAI Reportedly Raises $11 Billion at $1.25 Trillion Valuation"
         },
         {
-          "link" : "https:\/\/thinkingmachines.ai\/news\/inkling-2-small\/?utm_source=tldrai",
-          "summary" : "Inkling 2 Small is a Mixture-of-Experts model with 594B total parameters, 17B active, that supports image inputs and variable effort. The model's vision and agentic capabilities enable it to incorporate visual feedback to iteratively build and refine websites, games, and 3D designs with interactive elements. It will be initially available through Tinker with closed weights. Full weights will be available under an Apache 2.0 license next week after the completion of external safety testing and red-teaming.",
-          "title" : "Introducing Inkling 2 Small"
+          "link" : "https:\/\/www.planned-obsolescence.org\/p\/ai-is-dramatically-accelerating-ai?utm_source=tldrai",
+          "summary" : "Anthropic claims it may imminently meet its own threshold of 'dramatically accelerated progress due to AI'. Some researchers believe the company has already crossed that threshold. This may be the biggest AI risk humanity has faced. The industry is not prepared to handle this safely.",
+          "title" : "AI is dramatically accelerating AI research right now"
         },
         {
-          "link" : "https:\/\/blog.google\/innovation-and-ai\/technology\/developers-tools\/introducing-gemini-omni-1-2-flash\/?utm_source=tldrai",
-          "summary" : "Google introduces Gemini Omni 1.2 Flash, enhancing speed, cost-efficiency, and extended clip lengths for AI models. This update aims to improve developer tools and effectiveness in AI applications.",
-          "title" : "Gemini Omni 1.2 Flash"
+          "link" : "https:\/\/www.anthropic.com\/research\/components-of-agent-memory?utm_source=tldrai",
+          "summary" : "Anthropic explored how AI agents can build effective long-term memory by capturing experiences during interactions and reorganizing them during idle periods through a process called “dreaming.” The post examines how different memory components contribute to organizing and retaining useful information.",
+          "title" : "How Anthropic Builds Agent Memory"
         },
         {
-          "link" : "https:\/\/metr.org\/blog\/2026-11-05-anthropic-ai-rd-acceleration-assessment\/?utm_source=tldrai",
-          "summary" : "Anthropic's AI R&D capabilities accelerated significantly, improving model performance on well-defined tasks at roughly twice the rate compared to 2024-2025. This acceleration primarily results from AI's increasing role in R&D, though multiple factors contributed in late 2025.",
-          "title" : "Independent Assessment of AI R&D Acceleration at Anthropic in October 2026"
+          "link" : "https:\/\/x.com\/tomasmann1878\/status\/2119346730458038678?s=12&utm_source=tldrai",
+          "summary" : "This post details the experience of a research engineer working on RSI at Meta teaching agents to solve the world's hardest problems with tokens and compute. Their role is to teach AI agents how to train the next generation of models and self-evolve. The post details how to get into AI research, what skills matter in research engineering, and more.",
+          "title" : "A year as a Research Engineer working on RSI at Meta"
         },
         {
-          "link" : "https:\/\/blog.cloudflare.com\/trusted-agent-delegation?utm_source=tldrai",
-          "summary" : "Cloudflare has outlined the challenges websites face as AI agents increasingly act on behalf of users, making it harder to verify identities, assess trustworthiness, and assign accountability.",
-          "title" : "Cloudflare's Trust Framework for AI Agents"
+          "link" : "https:\/\/threadreaderapp.com\/thread\/2119541238856663473.html?utm_source=tldrai",
+          "summary" : "OpenAI's report on its own research automation shows that models struggle to do its R&D work. Recursive self-improvement is supposed to be one of the most consequential AI developments in the next few years. Agents are increasingly solving more complex tasks for researchers, but reliability is still low. This post looks at some possible explanations for why.",
+          "title" : "What the heck is going on with OpenAI internal AI R&D time horizons"
         },
         {
-          "link" : "https:\/\/www.dwarkesh.com\/p\/clocktower?utm_source=tldrai",
-          "summary" : "Blood on the Clocktower is a social deception game. Watching AI play the game unveils a lot about how AI is progressing on a set of AI capabilities that no other benchmark gives clear visibility into. The game requires AI to execute schemes with creativity, on-the-spot bluffing, and collective reasoning. This post looks at what happens when you pit AI models against each other in the game.",
-          "title" : "The benchmark where AIs have to lie to win"
+          "link" : "https:\/\/openrouter.ai\/blog\/announcements\/auto-and-auto-code-routers\/?utm_source=tldrai",
+          "summary" : "OpenRouter has launched the next generation of Auto Router, which outperforms the old router by up to 4x. The launch includes Auto Code, a new router specialized for coding work. The new Auto Router and Auto Code choose models by weighing eleven factors about each request and combining them with live pricing, provider health, and cache status. Users can apply any governance policies, and Auto Router makes efficient choices from the models available.",
+          "title" : "Introducing the New Auto and Auto Code Routers"
         },
         {
-          "link" : "https:\/\/research.nvidia.com\/labs\/lpr\/vflash\/?utm_source=tldrai",
-          "summary" : "NVIDIA VFlash is a vision model that generates geometric predictions like robot trajectories and 3D motion in parallel rather than token by token.",
-          "title" : "NVIDIA Introduced VFlash"
+          "link" : "https:\/\/psi.inc\/research\/aaronson-ambainis\/?utm_source=tldrai",
+          "summary" : "The Aaronson-Ambainis conjecture, a key open problem in quantum complexity theory, has been proven by a research system developed at PSI using an Anthropic model. This proof shows quantum computers are not exponentially faster on random inputs compared to classical ones, resolving a significant question about quantum speedups.",
+          "title" : "A proof of the Aaronson-Ambainis conjecture"
         },
         {
-          "link" : "https:\/\/huggingface.co\/blog\/nvidia\/cosmos-interactive-world-simulation?utm_source=tldrai",
-          "summary" : "NVIDIA's Cosmos 3 platform now offers four open-weight models for interactive world simulation and driving scenes, each with 16 billion trainable parameters. These models enable multi-sensor data generation, synchronized observations, and photorealistic video from simulator controls, supporting advanced research in robotics and autonomous driving.",
-          "title" : "New NVIDIA Cosmos 3 Open Models for Interactive World Simulation"
+          "link" : "https:\/\/ace.githubnext.com\/?utm_source=tldrai",
+          "summary" : "Ace is a tool for building software together, locally. It allows developers to collaborate with agents and their teams, all from their own machine. Agents run with the privileges of the user running the host and can execute shell commands and change files beyond the project. Teams can work together without exposing anything to the public internet.",
+          "title" : "Ace"
         },
         {
-          "link" : "https:\/\/x.com\/OrnnExchange\/status\/2118372699093295482?utm_source=tldrai",
-          "summary" : "GPU providers sell capacity through reservations, on-demand rentals, and interruptible spot contracts. Reservations help secure financing through predictable revenue, on-demand offers flexibility at higher rates, and spot monetizes idle capacity. Ornn's compute price indices track executed on-demand transactions, excluding reservations and spot rentals.",
-          "title" : "How Primary Compute Markets Work"
+          "link" : "https:\/\/hunch.net\/?p=13764006&amp;utm_source=tldrai",
+          "summary" : "AI Frontiers was a sub-organization within Microsoft Research that actively tried to organize coherent research efforts. It succeeded in pioneering things, with much of the work focused on how to make agents work. AI Frontiers was reorganized into Microsoft AI in early September.",
+          "title" : "The End of AI Frontiers"
         },
         {
-          "link" : "https:\/\/claude.com\/resources\/articles\/introducing-personal-finance-in-claude?utm_source=tldrai",
-          "summary" : "Anthropic Personal Finance in Claude allows users to securely connect bank and credit card accounts to ask questions about balances, transactions, and spending.",
-          "title" : "Personal Finance in Claude"
+          "link" : "https:\/\/x.com\/patrickc\/status\/2119495828683530519?utm_source=tldrai",
+          "summary" : "Patrick Collison questions how work, resource allocation, and human control would function in a positive AI future. He also argues that granting moral worth to vastly numerous AIs could overwhelm human interests under utilitarianism, raising unresolved questions about AI's societal vision and public support.",
+          "title" : "What Does a Positive AI Future Look Like?"
         },
         {
-          "link" : "https:\/\/huggingface.co\/spaces\/huggingface\/moe-blogpost?utm_source=tldrai",
-          "summary" : "Hugging Face released \"The Ultimate MoE Training Handbook,\" a comprehensive guide on training mixture-of-experts models.",
-          "title" : "The Ultimate MoE Training Handbook"
+          "link" : "https:\/\/www.doubleai.com\/research\/can-llms-redesign-themselves-as-they-train?utm_source=tldrai",
+          "summary" : "LLMs can integrate coding agents into the training loop to redesign their architectures to address limitations like compositionality and generalization.",
+          "title" : "Can LLMs redesign themselves as they train?"
         },
         {
-          "link" : "https:\/\/about.fb.com\/news\/2026\/11\/introducing-muse-ai-voice-expressive-avatars\/?utm_source=tldrai",
-          "summary" : "Meta announced voice conversations and expressive avatars for its Muse app, allowing users to brainstorm, plan trips, and complete tasks through spoken interactions.",
-          "title" : "Muse Voice"
+          "link" : "https:\/\/www.linkedin.com\/feed\/update\/urn:li:activity:7519100037973401600\/?utm_source=tldrai",
+          "summary" : "Warp Sciences raised a $215M Series A led by Lightspeed to accelerate drug discovery with AI and robotics.",
+          "title" : "Warp Sciences raises $215M for AI-powered labs"
         }
       ]
     },
     "newsFetchedAt" : {
-      "https:\/\/techcrunch.com\/category\/artificial-intelligence\/feed\/" : 815695623.835498,
-      "https:\/\/tldr.tech\/api\/rss\/ai" : 815915121.991257
+      "https:\/\/tldr.tech\/api\/rss\/ai" : 815999517.595104
     },
     "weather" : {
       "Bouliac|celsius" : {
-        "apparentTemperature" : 5.4,
-        "code" : 0,
+        "apparentTemperature" : 17,
+        "code" : 1,
         "days" : [
           {
-            "code" : 45,
-            "day" : "Sam. 7",
-            "high" : 14.9,
-            "low" : 3.2,
-            "rainProbability" : 3
+            "code" : 61,
+            "day" : "Mer. 11",
+            "high" : 20.2,
+            "low" : 13.1,
+            "rainProbability" : 45
           },
           {
-            "code" : 3,
-            "day" : "Dim. 8",
-            "high" : 19.1,
-            "low" : 8.5,
-            "rainProbability" : 3
+            "code" : 63,
+            "day" : "Jeu. 12",
+            "high" : 15.4,
+            "low" : 11,
+            "rainProbability" : 91
           },
           {
             "code" : 61,
-            "day" : "Lun. 9",
-            "high" : 18.6,
-            "low" : 13.6,
-            "rainProbability" : 50
+            "day" : "Ven. 13",
+            "high" : 11,
+            "low" : 3.7,
+            "rainProbability" : 55
           }
         ],
-        "high" : 14.9,
+        "high" : 22.5,
         "hours" : [
           {
-            "code" : 0,
-            "isDay" : false,
-            "temperature" : 6.9,
-            "time" : 815691600
+            "code" : 1,
+            "isDay" : true,
+            "temperature" : 20,
+            "time" : 816001200
           },
           {
-            "code" : 45,
-            "isDay" : false,
-            "temperature" : 5.3,
-            "time" : 815702400
+            "code" : 2,
+            "isDay" : true,
+            "temperature" : 22.2,
+            "time" : 816012000
           },
           {
-            "code" : 45,
+            "code" : 3,
             "isDay" : false,
-            "temperature" : 3.4,
-            "time" : 815713200
+            "temperature" : 18.2,
+            "time" : 816022800
           },
           {
-            "code" : 45,
+            "code" : 3,
             "isDay" : false,
-            "temperature" : 3.6,
-            "time" : 815724000
+            "temperature" : 17.4,
+            "time" : 816033600
           }
         ],
-        "humidity" : 91,
-        "isDay" : false,
-        "low" : 2.7,
-        "observedAt" : 815689800,
+        "humidity" : 71,
+        "isDay" : true,
+        "low" : 13.7,
+        "observedAt" : 815998500,
         "rainAmount" : 0,
-        "rainProbability" : 0,
-        "sunrise" : 815640406,
-        "sunset" : 815676240,
-        "temperature" : 7.1,
-        "uvIndex" : 2.85,
-        "windDirection" : 108,
-        "windSpeed" : 4.6
+        "rainProbability" : 43,
+        "sunrise" : 815986338,
+        "sunset" : 816021544,
+        "temperature" : 18.3,
+        "uvIndex" : 2.35,
+        "windDirection" : 164,
+        "windSpeed" : 15.7
       }
     }
   },
   "templateID" : "original",
-  "updatedAt" : 815915169.491663,
+  "updatedAt" : 815999533.393307,
   "version" : 1,
   "width" : 1072
 }
