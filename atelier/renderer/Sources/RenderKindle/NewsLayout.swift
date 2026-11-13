@@ -5,7 +5,7 @@ enum NewsLayout {
     static func height(_ b: PageBlock, sources: SourceSnapshot) -> Double {
         let width = max(20, b.width - 2 * b.padding)
         func measure(_ text: String, size: Double, bold: Bool = false, lines: Int? = nil) -> Double {
-            var font = NSFont(name: b.fontName, size: size) ?? .systemFont(ofSize: size)
+            var font = NSFont(name: PageFonts.name(b.fontName), size: size) ?? .systemFont(ofSize: size)
             if bold { font = NSFontManager.shared.convert(font, toHaveTrait: .boldFontMask) }
             let paragraph = NSMutableParagraphStyle(); paragraph.lineSpacing = b.lineSpacing
             let rect = (text as NSString).boundingRect(with: NSSize(width: width, height: 100_000), options: [.usesLineFragmentOrigin,.usesFontLeading], attributes: [.font:font,.paragraphStyle:paragraph])

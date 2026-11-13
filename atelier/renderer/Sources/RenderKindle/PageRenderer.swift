@@ -29,7 +29,7 @@ struct BlockContent: View {
     private var textAlignment: TextAlignment { block.alignment == "center" ? .center : block.alignment == "right" ? .trailing : .leading }
     private var frameAlignment: Alignment { block.alignment == "center" ? .top : block.alignment == "right" ? .topTrailing : .topLeading }
     private var font: Font {
-        var font = Font.custom(block.fontName, size: block.fontSize)
+        var font = PageFonts.font(block.fontName,size: block.fontSize)
         if block.bold { font = font.weight(.bold) }
         if block.italic { font = font.italic() }
         return font
@@ -80,8 +80,8 @@ struct BlockContent: View {
                         HStack(spacing: 18) {
                             Image(systemName: Self.weatherIcon(day.code)).font(.system(size: block.fontSize * 1.45, weight: .light))
                             VStack(alignment: .leading, spacing: 12) {
-                                Text(day.day.uppercased()).font(.custom("Inter", size: block.fontSize * 0.65))
-                                Text(String(format: "%.0f° / %.0f°", day.high, day.low)).font(.custom(block.fontName, size: block.fontSize))
+                                Text(day.day.uppercased()).font(PageFonts.font("Inter",size: block.fontSize * 0.65))
+                                Text(String(format: "%.0f° / %.0f°", day.high, day.low)).font(PageFonts.font(block.fontName,size: block.fontSize))
                             }
                         }.frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -89,11 +89,11 @@ struct BlockContent: View {
             }
         } else {
         VStack(alignment: .leading, spacing: block.fontSize * 0.4) {
-            Text(block.city).font(.custom(block.fontName, size: block.fontSize))
+            Text(block.city).font(PageFonts.font(block.fontName,size: block.fontSize))
             HStack(alignment: .center, spacing: 28) {
                 HStack(spacing: 18) {
                     Text(weather.map { String(format: "%.0f°", $0.temperature) } ?? "—°")
-                        .font(.custom(block.fontName, size: block.fontSize * 2.9)).fixedSize()
+                        .font(PageFonts.font(block.fontName,size: block.fontSize * 2.9)).fixedSize()
                     Image(systemName: Self.weatherIcon(weather?.code ?? 3)).font(.system(size: block.fontSize * 1.65, weight: .light))
                 }.fixedSize().layoutPriority(1)
                 if block.showForecast, let weather {
@@ -103,7 +103,7 @@ struct BlockContent: View {
                             Text(day.day.capitalized)
                             Image(systemName: Self.weatherIcon(day.code)).font(.system(size: block.fontSize * 0.9))
                             Text(String(format: "%.0f° / %.0f°", day.high, day.low))
-                        }.font(.custom(block.fontName, size: block.fontSize * 0.64)).frame(maxWidth: .infinity)
+                        }.font(PageFonts.font(block.fontName,size: block.fontSize * 0.64)).frame(maxWidth: .infinity)
                     }
                 }
             }
@@ -114,33 +114,33 @@ struct BlockContent: View {
     private var news: some View {
         VStack(alignment: .leading, spacing: NewsLayout.gap(block)) {
             if !block.text.isEmpty {
-                Text(block.text).font(.custom(block.fontName, size: block.fontSize * 1.08).weight(.semibold))
+                Text(block.text).font(PageFonts.font(block.fontName,size: block.fontSize * 1.08).weight(.semibold))
                     .fixedSize(horizontal: false, vertical: true)
             }
             if page.sources.sourceErrors?["news:" + block.sourceURL] != nil {
                 Text("Source indisponible · dernière récupération : " + WeatherText.updateTime(page.sources.newsFetchedAt?[block.sourceURL], relativeTo: date, timezone: page.schedule.timezone))
-                    .font(.custom("Inter", size: max(13, block.fontSize * 0.48))).foregroundStyle(Color(white: 0.4))
+                    .font(PageFonts.font("Inter",size: max(13, block.fontSize * 0.48))).foregroundStyle(Color(white: 0.4))
             }
             if let articles = page.sources.news[block.sourceURL], !articles.isEmpty {
                 ForEach(Array(articles.dropFirst(block.newsOffset).prefix(block.articleCount).enumerated()), id: \.offset) { _, item in
                     VStack(alignment: .leading, spacing: 9) {
-                        Text(item.title).font(.custom(block.fontName, size: block.fontSize).weight(.semibold))
+                        Text(item.title).font(PageFonts.font(block.fontName,size: block.fontSize).weight(.semibold))
                             .fixedSize(horizontal: false, vertical: true)
                         if block.showSummary && !item.summary.isEmpty {
-                            Text(item.summary).font(.custom(block.fontName, size: block.fontSize * 0.84))
+                            Text(item.summary).font(PageFonts.font(block.fontName,size: block.fontSize * 0.84))
                                 .lineLimit(block.newsSummaryLines).fixedSize(horizontal: false, vertical: true)
                         }
                     }.frame(maxWidth: .infinity, alignment: .leading)
                 }
                 if block.showNewsSource == true {
                     Text(URL(string: block.sourceURL)?.host ?? block.sourceURL)
-                        .font(.custom("Inter", size: max(13, block.fontSize * 0.48))).foregroundStyle(Color(white: 0.4))
+                        .font(PageFonts.font("Inter",size: max(13, block.fontSize * 0.48))).foregroundStyle(Color(white: 0.4))
                 }
             } else {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Ajoutez une adresse de site ou de flux RSS dans Contenu, puis chargez les articles.")
-                    Text(block.sourceURL).font(.custom("Inter", size: max(15, block.fontSize * 0.55)))
-                }.font(.custom(block.fontName, size: block.fontSize * 0.8))
+                    Text(block.sourceURL).font(PageFonts.font("Inter",size: max(15, block.fontSize * 0.55)))
+                }.font(PageFonts.font(block.fontName,size: block.fontSize * 0.8))
             }
         }.frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -165,6 +165,7 @@ struct BlockContent: View {
 
 @MainActor enum PageRenderer {
     static func png(_ page: KindlePage, date: Date = Date()) throws -> Data {
+        try PageFonts.register(page,resources:Bundle.module.resourceURL!)
         let renderer = ImageRenderer(content: PageScene(page: page, date: date))
         renderer.scale = 1
         renderer.proposedSize = ProposedViewSize(width: page.width, height: page.height)

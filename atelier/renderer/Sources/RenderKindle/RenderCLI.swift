@@ -11,12 +11,9 @@ import CryptoKit
             let input = URL(fileURLWithPath: CommandLine.arguments[1])
             let output = URL(fileURLWithPath: CommandLine.arguments[2], isDirectory: true)
             var page = try KindlePage.decode(Data(contentsOf: input))
-            let fonts = Bundle.module.resourceURL!.appendingPathComponent("Resources/Fonts")
-            for url in (try? FileManager.default.contentsOfDirectory(at: fonts, includingPropertiesForKeys: nil)) ?? [] {
-                CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
-            }
-            for font in page.fonts {
-                if let provider = CGDataProvider(data: font.data as CFData), let cgFont = CGFont(provider) { CTFontManagerRegisterGraphicsFont(cgFont, nil) }
+            try PageFonts.register(page,resources:Bundle.module.resourceURL!)
+            for requested in Set(page.blocks.filter{!$0.hidden}.map(\.fontName)).sorted() {
+                print("Police : \(requested) = \(PageFonts.name(requested))")
             }
             let deployment = (try? String(contentsOf: input.deletingLastPathComponent().appendingPathComponent("deployment.txt"), encoding: .utf8))?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             if !CommandLine.arguments.contains("--cached") {
