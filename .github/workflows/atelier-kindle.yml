@@ -23,8 +23,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo 'Autorisation de déclenchement vérifiée'
-  render:
+  sources:
     if: github.event_name != 'workflow_dispatch' || !inputs.authorization_probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Récupérer la météo
+        run: python3 atelier/renderer/fetch-sources.py atelier/source-requests.json .atelier-sources
+      - uses: actions/upload-artifact@v4
+        with:
+          name: atelier-sources
+          path: .atelier-sources
+          include-hidden-files: true
+          retention-days: 1
+  render:
+    needs: sources
+    if: always() && (github.event_name != 'workflow_dispatch' || !inputs.authorization_probe)
     runs-on: macos-15
     timeout-minutes: 15
     steps:
@@ -41,7 +56,14 @@ jobs:
         run: swift build -c release --package-path atelier/renderer
       - uses: actions/configure-pages@v5
         id: pages
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: atelier-sources
+          path: .atelier-sources
       - name: Produire l’édition
+        env:
+          ATELIER_SOURCE_FOLDER: ${{ github.workspace }}/.atelier-sources
         run: |
           atelier/renderer/.build/release/RenderKindle atelier/composition.kindlepage site --previous "${{ steps.pages.outputs.base_url }}/sources.json"
           cp atelier/deployment.txt site/deployment.txt

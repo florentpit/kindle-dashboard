@@ -39,6 +39,8 @@ enum SourceService {
     /// provider. The system curl gives the renderer an explicit IPv4 route.
     static func serverData(_ url: URL, executable: String = "/usr/bin/curl") async throws -> Data {
         guard url.scheme == "https" else { throw PageError.invalid("La source doit utiliser HTTPS.") }
+        if let path = ProcessInfo.processInfo.environment["ATELIER_SOURCE_FOLDER"],
+           let bytes = ServerSourceCache.read(url, folder: URL(fileURLWithPath: path)) { return bytes }
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent("atelier-source-" + UUID().uuidString)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
         defer { try? FileManager.default.removeItem(at: folder) }
