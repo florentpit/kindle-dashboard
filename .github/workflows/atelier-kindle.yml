@@ -1,7 +1,7 @@
 name: Atelier Kindle
 on:
   schedule:
-    - cron: '43 * * * *'
+    - cron: '7,22,37,52 * * * *'
   workflow_dispatch:
     inputs:
       authorization_probe:
