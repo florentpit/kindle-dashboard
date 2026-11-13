@@ -26,6 +26,7 @@ import CryptoKit
             let sha = SHA256.hash(data: png).map { String(format: "%02x", $0) }.joined()
             try "\(sha)  dashboard.png\n".write(to: output.appendingPathComponent("dashboard.sha256"), atomically: true, encoding: .utf8)
             try ISO8601DateFormatter().string(from: now).write(to: output.appendingPathComponent("version.txt"), atomically: true, encoding: .utf8)
+            try String(Int(now.timeIntervalSince1970)).write(to:output.appendingPathComponent("generated-at.txt"),atomically:true,encoding:.utf8)
             let schedule = page.schedule.nextDates(after: now, count: 400).map { "\(Int($0.timeIntervalSince1970))\n" }.joined()
             try schedule.write(to: output.appendingPathComponent("schedule.txt"), atomically: true, encoding: .utf8)
             print("Édition générée : \(Int(page.width)) × \(Int(page.height)), PNG gris, SHA-256 \(sha)")

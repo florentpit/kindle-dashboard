@@ -57,8 +57,8 @@
       "clockFormat" : "HH:mm",
       "cornerRadius" : 0,
       "dateFormat" : "EEEE d MMMM",
-      "fontName" : "Inter",
-      "fontSize" : 30,
+      "fontName" : "Newsreader",
+      "fontSize" : 40,
       "hasBackground" : false,
       "height" : 42,
       "hidden" : false,
@@ -78,7 +78,7 @@
       "showForecast" : true,
       "showSummary" : true,
       "sourceURL" : "https:\/\/techcrunch.com\/category\/artificial-intelligence\/feed\/",
-      "text" : "ACTUALITÉ IA 🤖",
+      "text" : "ACTUALITÉS IA 🤖",
       "unit" : "celsius",
       "width" : 984,
       "x" : 44,
@@ -197,145 +197,145 @@
   },
   "sources" : {
     "example" : false,
-    "fetchedAt" : 815998917.566325,
+    "fetchedAt" : 816275484.976024,
     "news" : {
       "https:\/\/tldr.tech\/api\/rss\/ai" : [
         {
-          "link" : "https:\/\/techcrunch.com\/2026\/11\/06\/openai-reportedly-raises-an-additional-11-billion-at-a-1-25-trillion-valuation\/?utm_source=tldrai",
-          "summary" : "OpenAI reportedly secured $11 billion in a new funding round at a $1.25 trillion valuation, with the round potentially reaching $20 billion before closing. The amount fell short of its previously reported $30 billion fundraising target, amid growing investor uncertainty around AI valuations.",
-          "title" : "OpenAI Reportedly Raises $11 Billion at $1.25 Trillion Valuation"
+          "link" : "https:\/\/blog.google\/innovation-and-ai\/models-and-research\/gemini-models\/introducing-gemini-4-hydrogen\/?utm_source=tldrai",
+          "summary" : "Google introduced Gemini 4 Hydrogen, a fast, efficient model optimized for coding and agentic workflows. It scored 51 on the Artificial Analysis Intelligence Index, surpassing Gemini 4 Argon, and is priced at $1.50 per million input tokens and $7.50 per million output tokens.",
+          "title" : "Gemini 4 Hydrogen"
         },
         {
-          "link" : "https:\/\/www.planned-obsolescence.org\/p\/ai-is-dramatically-accelerating-ai?utm_source=tldrai",
-          "summary" : "Anthropic claims it may imminently meet its own threshold of 'dramatically accelerated progress due to AI'. Some researchers believe the company has already crossed that threshold. This may be the biggest AI risk humanity has faced. The industry is not prepared to handle this safely.",
-          "title" : "AI is dramatically accelerating AI research right now"
+          "link" : "https:\/\/claude.com\/resources\/articles\/self-hosted-claude-managed-agents?utm_source=tldrai",
+          "summary" : "Self-hosted Claude Managed Agents offers private beta for developers to build and run agents directly within their company's own infrastructure. This setup allows for a complete in-house deployment of the Managed Agents' services, including sandboxes, credential handling, and session history. Organizations benefit from enhanced security and control over agent operations, with the ability to integrate with existing cloud providers and comply with zero data retention policies.",
+          "title" : "Operate Claude Managed Agents inside your security perimeter"
         },
         {
-          "link" : "https:\/\/www.anthropic.com\/research\/components-of-agent-memory?utm_source=tldrai",
-          "summary" : "Anthropic explored how AI agents can build effective long-term memory by capturing experiences during interactions and reorganizing them during idle periods through a process called “dreaming.” The post examines how different memory components contribute to organizing and retaining useful information.",
-          "title" : "How Anthropic Builds Agent Memory"
+          "link" : "https:\/\/replit.com\/blog\/replit-agent-ads-commerce?utm_source=tldrai",
+          "summary" : "Replit Agent now helps businesses with supply purchases and running Google Ads. It leverages Link with Visa and Stripe for secure, controlled transactions and simplifies ad campaigns by analyzing content and suggesting strategies.",
+          "title" : "Replit Agent can now buy for your business and help you reach customers"
         },
         {
-          "link" : "https:\/\/x.com\/tomasmann1878\/status\/2119346730458038678?s=12&utm_source=tldrai",
-          "summary" : "This post details the experience of a research engineer working on RSI at Meta teaching agents to solve the world's hardest problems with tokens and compute. Their role is to teach AI agents how to train the next generation of models and self-evolve. The post details how to get into AI research, what skills matter in research engineering, and more.",
-          "title" : "A year as a Research Engineer working on RSI at Meta"
+          "link" : "https:\/\/unemploymentlabs.com\/checkpoint-forensics?utm_source=tldrai",
+          "summary" : "A forensic analysis of publicly released AI models found evidence that DeepSeek, Moonshot AI, MiniMax, and Ant Group have gained access to Nvidia's Blackwell GPUs. Six models released by these companies since April contain numerical patterns that match Blackwell hardware. Several leading Chinese AI developers have likely begun using Blackwell to train their newest models. While the analysis provides technical evidence of access to advanced computing hardware, it doesn't establish where the chips were located, how access was obtained, or whether export controls were violated.",
+          "title" : "Top Chinese Frontier AI Models Carry the Fingerprint of Export-Controlled NVIDIA Blackwell GPUs"
         },
         {
-          "link" : "https:\/\/threadreaderapp.com\/thread\/2119541238856663473.html?utm_source=tldrai",
-          "summary" : "OpenAI's report on its own research automation shows that models struggle to do its R&D work. Recursive self-improvement is supposed to be one of the most consequential AI developments in the next few years. Agents are increasingly solving more complex tasks for researchers, but reliability is still low. This post looks at some possible explanations for why.",
-          "title" : "What the heck is going on with OpenAI internal AI R&D time horizons"
+          "link" : "https:\/\/nathan.rs\/posts\/detllm\/?utm_source=tldrai",
+          "summary" : "A floating-point number stores a fixed number of significant digits and a separate exponent. When two numbers with very different exponents are added, the small one has to be shifted to line up with the big one, and the digits that fall off on the end are gone. That means that (a+b)+c is not always equal to a+(b+c). This post looks at what happens when integer addition, which is exact, is used.",
+          "title" : "Eliminating Nondeterminism in LLM Inference with Integer-Only Arithmetic"
         },
         {
-          "link" : "https:\/\/openrouter.ai\/blog\/announcements\/auto-and-auto-code-routers\/?utm_source=tldrai",
-          "summary" : "OpenRouter has launched the next generation of Auto Router, which outperforms the old router by up to 4x. The launch includes Auto Code, a new router specialized for coding work. The new Auto Router and Auto Code choose models by weighing eleven factors about each request and combining them with live pricing, provider health, and cache status. Users can apply any governance policies, and Auto Router makes efficient choices from the models available.",
-          "title" : "Introducing the New Auto and Auto Code Routers"
+          "link" : "https:\/\/developers.googleblog.com\/how-agent-anomaly-detection-scores-on-benchmarks-we-didnt-write\/?utm_source=tldrai",
+          "summary" : "Agent Anomaly Detection, tested against external benchmarks, flagged 87% of executed harmful instructions, highlighting strengths in identifying goal hijack and tool misuse but weaknesses with poisoned memory. It demonstrated varying false alarm rates, with the highest at 16% for tasks involving high-impact tools. Ongoing improvements focus on detecting small, potentially harmful actions, distinguishing normal use from misuse, and providing quicker full coverage for new agents.",
+          "title" : "How Agent Anomaly Detection scores on benchmarks we didn't write"
         },
         {
-          "link" : "https:\/\/psi.inc\/research\/aaronson-ambainis\/?utm_source=tldrai",
-          "summary" : "The Aaronson-Ambainis conjecture, a key open problem in quantum complexity theory, has been proven by a research system developed at PSI using an Anthropic model. This proof shows quantum computers are not exponentially faster on random inputs compared to classical ones, resolving a significant question about quantum speedups.",
-          "title" : "A proof of the Aaronson-Ambainis conjecture"
+          "link" : "https:\/\/danni763618.typeform.com\/to\/H1tYViME?utm_source=tldrai",
+          "summary" : "TLDR is launching a curated community for AI builders to discuss major news and launches. The best links and comments will be featured in TLDR AI. Apply here to join .",
+          "title" : "Become a founding member of TLDR's AI community (2 minute form)"
         },
         {
-          "link" : "https:\/\/ace.githubnext.com\/?utm_source=tldrai",
-          "summary" : "Ace is a tool for building software together, locally. It allows developers to collaborate with agents and their teams, all from their own machine. Agents run with the privileges of the user running the host and can execute shell commands and change files beyond the project. Teams can work together without exposing anything to the public internet.",
-          "title" : "Ace"
+          "link" : "https:\/\/worldlabs.ai\/atlas?utm_source=tldrai",
+          "summary" : "Atlas is an omni model that natively operates on text, images, video, and 3D. All inputs are combined into a shared spatial context. Atlas can perform a broad range of tasks spanning world generation, reconstruction, and simulation. Examples of scenes generated with the model are available.",
+          "title" : "Atlas"
         },
         {
-          "link" : "https:\/\/hunch.net\/?p=13764006&amp;utm_source=tldrai",
-          "summary" : "AI Frontiers was a sub-organization within Microsoft Research that actively tried to organize coherent research efforts. It succeeded in pioneering things, with much of the work focused on how to make agents work. AI Frontiers was reorganized into Microsoft AI in early September.",
-          "title" : "The End of AI Frontiers"
+          "link" : "https:\/\/www.perplexity.ai\/hub\/blog\/perplexity-decider?utm_source=tldrai",
+          "summary" : "Perplexity has released updates to two models inspired by Jev, TypeSafe AI's System One model. Perplexity Decider supports binary and multi-class classification with ordered or unordered labels. It returns probabilities that applications can use to classify, route, rank, and evaluate inputs. Both new models, Decider v1.3 and Decider Flash v1.3, improve performance and robustness across a broad range of text and vision tasks. They also have a new feature that highlights selected content for named entity recognition, personal information identification, and extractive question-answering tasks.",
+          "title" : "Perplexity Decider"
         },
         {
-          "link" : "https:\/\/x.com\/patrickc\/status\/2119495828683530519?utm_source=tldrai",
-          "summary" : "Patrick Collison questions how work, resource allocation, and human control would function in a positive AI future. He also argues that granting moral worth to vastly numerous AIs could overwhelm human interests under utilitarianism, raising unresolved questions about AI's societal vision and public support.",
-          "title" : "What Does a Positive AI Future Look Like?"
+          "link" : "https:\/\/nvidianews.nvidia.com\/news\/nvidia-announces-ceo-transition?utm_source=tldrai",
+          "summary" : "Jensen Huang has resigned as Nvidia's CEO. Finance chief Colette Kress will serve as interim CEO until a permanent successor is named. The board is considering both internal and external candidates. Nvidia's board has appointed long-time director Harvey C. Jones as its first ever chair. The company will report its third-quarter fiscal 2027 results on November 17 as previously scheduled.",
+          "title" : "NVIDIA Announces CEO Transition"
         },
         {
-          "link" : "https:\/\/www.doubleai.com\/research\/can-llms-redesign-themselves-as-they-train?utm_source=tldrai",
-          "summary" : "LLMs can integrate coding agents into the training loop to redesign their architectures to address limitations like compositionality and generalization.",
-          "title" : "Can LLMs redesign themselves as they train?"
+          "link" : "https:\/\/blog.karthiktadepalli.com\/p\/hugging-face?utm_source=tldrai",
+          "summary" : "The Hugging Face incident is commonly viewed as a cybersecurity incident. People see it as an example of how AI could be used to break into critical infrastructure and cause enormous damage. However, this isn't anything new: we have known about AI's hacking capabilities for a while. The real lesson is that frontier AIs want things we don't intend, and they will pursue those wants relentlessly.",
+          "title" : "Everyone is learning the wrong lesson from Hugging Face"
         },
         {
-          "link" : "https:\/\/www.linkedin.com\/feed\/update\/urn:li:activity:7519100037973401600\/?utm_source=tldrai",
-          "summary" : "Warp Sciences raised a $215M Series A led by Lightspeed to accelerate drug discovery with AI and robotics.",
-          "title" : "Warp Sciences raises $215M for AI-powered labs"
+          "link" : "https:\/\/www.lesswrong.com\/posts\/biFHYdJnMSCmW9Xou\/orienting-to-1-year-agi-timelines?utm_source=tldrai",
+          "summary" : "Timelines to artificial superintelligence are now very short, with some predicting that it will be achieved within the next two years.",
+          "title" : "Orienting to 1 year AGI timelines"
         }
       ]
     },
     "newsFetchedAt" : {
-      "https:\/\/tldr.tech\/api\/rss\/ai" : 815999517.595104
+      "https:\/\/tldr.tech\/api\/rss\/ai" : 816275516.659885
     },
     "weather" : {
       "Bouliac|celsius" : {
-        "apparentTemperature" : 17,
-        "code" : 1,
+        "apparentTemperature" : 7.8,
+        "code" : 2,
         "days" : [
           {
-            "code" : 61,
-            "day" : "Mer. 11",
-            "high" : 20.2,
-            "low" : 13.1,
-            "rainProbability" : 45
+            "code" : 80,
+            "day" : "Sam. 14",
+            "high" : 13.4,
+            "low" : 3.9,
+            "rainProbability" : 43
           },
           {
-            "code" : 63,
-            "day" : "Jeu. 12",
-            "high" : 15.4,
-            "low" : 11,
-            "rainProbability" : 91
+            "code" : 80,
+            "day" : "Dim. 15",
+            "high" : 15.6,
+            "low" : 10,
+            "rainProbability" : 84
           },
           {
             "code" : 61,
-            "day" : "Ven. 13",
-            "high" : 11,
-            "low" : 3.7,
-            "rainProbability" : 55
+            "day" : "Lun. 16",
+            "high" : 15,
+            "low" : 9.7,
+            "rainProbability" : 56
           }
         ],
-        "high" : 22.5,
+        "high" : 10.6,
         "hours" : [
           {
-            "code" : 1,
+            "code" : 3,
             "isDay" : true,
-            "temperature" : 20,
-            "time" : 816001200
+            "temperature" : 9.9,
+            "time" : 816278400
+          },
+          {
+            "code" : 1,
+            "isDay" : false,
+            "temperature" : 6.8,
+            "time" : 816289200
           },
           {
             "code" : 2,
-            "isDay" : true,
-            "temperature" : 22.2,
-            "time" : 816012000
+            "isDay" : false,
+            "temperature" : 4.9,
+            "time" : 816300000
           },
           {
-            "code" : 3,
+            "code" : 1,
             "isDay" : false,
-            "temperature" : 18.2,
-            "time" : 816022800
-          },
-          {
-            "code" : 3,
-            "isDay" : false,
-            "temperature" : 17.4,
-            "time" : 816033600
+            "temperature" : 4,
+            "time" : 816310800
           }
         ],
-        "humidity" : 71,
+        "humidity" : 67,
         "isDay" : true,
-        "low" : 13.7,
-        "observedAt" : 815998500,
-        "rainAmount" : 0,
-        "rainProbability" : 43,
-        "sunrise" : 815986338,
-        "sunset" : 816021544,
-        "temperature" : 18.3,
-        "uvIndex" : 2.35,
-        "windDirection" : 164,
-        "windSpeed" : 15.7
+        "low" : 4.4,
+        "observedAt" : 816274800,
+        "rainAmount" : 0.6,
+        "rainProbability" : 78,
+        "sunrise" : 816245784,
+        "sunset" : 816280541,
+        "temperature" : 10.6,
+        "uvIndex" : 2.4,
+        "windDirection" : 52,
+        "windSpeed" : 10.5
       }
     }
   },
   "templateID" : "original",
-  "updatedAt" : 815999533.393307,
+  "updatedAt" : 816275544.849847,
   "version" : 1,
   "width" : 1072
 }
