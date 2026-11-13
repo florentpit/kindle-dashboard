@@ -6,32 +6,98 @@ import FoundationXML
 enum SourceService {
     static let presetURLs: Set<String> = ["https://www.lemonde.fr/rss/une.xml", "https://techcrunch.com/category/artificial-intelligence/feed/", "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", "https://www.technologyreview.com/topic/artificial-intelligence/feed", "https://tldr.tech/api/rss/ai"]
     static func data(_ url: URL) async throws -> Data {
+        try await data(url, session: .shared)
+    }
+    static func data(_ url: URL, session: URLSession, attempts: Int = 3) async throws -> Data {
         guard url.scheme == "https" else { throw PageError.invalid("La source doit utiliser HTTPS.") }
-        var request = URLRequest(url: url, timeoutInterval: 25)
-        request.setValue("AtelierKindle/0.1", forHTTPHeaderField: "User-Agent")
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let response = response as? HTTPURLResponse, (200..<300).contains(response.statusCode), response.url?.scheme == "https", data.count < 8_000_000 else {
-            throw PageError.invalid("La source ne répond pas correctement : \(url.host ?? "").")
+        for attempt in 0..<max(1, attempts) {
+            try Task.checkCancellation()
+            do {
+                var request = URLRequest(url: url, timeoutInterval: 25)
+                request.cachePolicy = .reloadIgnoringLocalCacheData
+                request.setValue("AtelierKindle/0.7.8", forHTTPHeaderField: "User-Agent")
+                let (bytes, response) = try await session.data(for: request)
+                guard let response = response as? HTTPURLResponse, response.url?.scheme == "https", bytes.count < 8_000_000 else {
+                    throw PageError.invalid("Réponse invalide : \(url.host ?? "source").")
+                }
+                if response.statusCode == 429 || (500..<600).contains(response.statusCode) {
+                    throw URLError(.resourceUnavailable)
+                }
+                guard (200..<300).contains(response.statusCode) else {
+                    throw PageError.invalid("La source \(url.host ?? "") répond HTTP \(response.statusCode).")
+                }
+                return bytes
+            } catch {
+                guard error is URLError, (error as? URLError)?.code != .cancelled, attempt + 1 < max(1, attempts) else { throw error }
+                try await Task.sleep(nanoseconds: UInt64(attempt + 1) * 500_000_000)
+            }
         }
-        return data
+        throw URLError(.unknown)
     }
 
     static func fetch(for page: KindlePage) async throws -> SourceSnapshot {
-        var result = SourceSnapshot()
-        for block in page.blocks where !block.hidden {
-            if block.kind == .weather {
-                let key = "\(block.city)|\(block.unit)"
-                guard result.weather[key] == nil else { continue }
-                let url = try WeatherService.url(block: block, timezone: page.schedule.timezone)
-                result.weather[key] = try WeatherService.decode(try await data(url), timezone: page.schedule.timezone)
-            } else if block.kind == .news, result.news[block.sourceURL] == nil {
-                let feed = try await articles(at: block.sourceURL)
-                result.news[block.sourceURL] = Array(feed.prefix(12))
-                if result.newsFetchedAt == nil { result.newsFetchedAt = [:] }; result.newsFetchedAt?[block.sourceURL] = Date()
+        try await fetch(for: page, loader: { try await data($0) })
+    }
+    private enum Loaded {
+        case weather(String, WeatherSnapshot), news(String, [NewsItem]), failed(String, String)
+    }
+    static func fetch(for page: KindlePage, loader: @escaping (URL) async throws -> Data) async throws -> SourceSnapshot {
+        // Each source has its own failure boundary. A slow feed cannot discard fresh weather.
+        var result = page.sources.example ? SourceSnapshot() : page.sources
+        if page.sources.example { result.weather = [:]; result.news = [:] }
+        var seen = Set<String>(), requested = 0, refreshed = 0
+        var failures: [String: String] = [:]
+        await withTaskGroup(of: Loaded.self) { group in
+            for block in page.blocks where !block.hidden {
+                if block.kind == .weather {
+                    let key = "\(block.city)|\(block.unit)"
+                    guard seen.insert("weather:" + key).inserted else { continue }; requested += 1
+                    group.addTask {
+                        do { return .weather(key, try WeatherService.decode(try await loader(WeatherService.url(block: block, timezone: page.schedule.timezone)), timezone: page.schedule.timezone)) }
+                        catch { return .failed("weather:" + key, error.localizedDescription) }
+                    }
+                } else if block.kind == .news {
+                    let address = block.sourceURL
+                    guard seen.insert("news:" + address).inserted else { continue }; requested += 1
+                    group.addTask {
+                        do { return .news(address, Array(try await articles(at: address, loader: loader).prefix(12))) }
+                        catch { return .failed("news:" + address, error.localizedDescription) }
+                    }
+                }
+            }
+            for await item in group {
+                switch item {
+                case let .weather(key, snapshot):
+                    result.weather[key] = snapshot
+                    if result.weatherFetchedAt == nil { result.weatherFetchedAt = [:] }
+                    result.weatherFetchedAt?[key] = Date(); refreshed += 1
+                case let .news(key, items):
+                    result.news[key] = items
+                    if result.newsFetchedAt == nil { result.newsFetchedAt = [:] }
+                    result.newsFetchedAt?[key] = Date(); refreshed += 1
+                case let .failed(key, message): failures[key] = message
+                }
             }
         }
-        result.example = false; result.fetchedAt = Date()
+        try Task.checkCancellation()
+        guard requested == 0 || refreshed > 0 else {
+            throw PageError.invalid("Aucune source actualisée. " + failures.sorted{$0.key < $1.key}.map{"\($0.key) : \($0.value)"}.joined(separator: " ; "))
+        }
+        result.sourceErrors = failures.isEmpty ? nil : failures
+        result.example = false
+        // A partial refresh must not make a failed weather source look newly fetched.
+        if failures.isEmpty { result.fetchedAt = Date() }
         return result
+    }
+
+    struct Cache: Codable {
+        var deploymentID: String
+        var sources: SourceSnapshot
+    }
+    static func previousSources(_ bytes: Data, deploymentID: String) -> SourceSnapshot? {
+        guard let cache = try? JSONDecoder().decode(Cache.self, from: bytes),
+              !deploymentID.isEmpty, cache.deploymentID == deploymentID, !cache.sources.example else { return nil }
+        return cache.sources
     }
 
     static func parseFeed(_ bytes: Data) -> [NewsItem] {
@@ -41,24 +107,27 @@ enum SourceService {
     }
 
     static func articles(at address: String) async throws -> [NewsItem] {
+        try await articles(at: address, loader: { try await data($0) })
+    }
+    static func articles(at address: String, loader: (URL) async throws -> Data) async throws -> [NewsItem] {
         guard let url = URL(string: address.trimmingCharacters(in: .whitespacesAndNewlines)), url.scheme == "https", url.host != nil else {
             throw PageError.invalid("Indiquez une adresse HTTPS de site ou de flux RSS / Atom.")
         }
         if url.host?.lowercased()=="tldr.tech",url.path.hasPrefix("/ai/") {
-            let stories=TLDRReader.stories(in:String(decoding:try await data(url),as:UTF8.self),edition:url)
+            let stories=TLDRReader.stories(in:String(decoding:try await loader(url),as:UTF8.self),edition:url)
             guard !stories.isEmpty else { throw PageError.invalid("Aucun article lisible dans cette édition TLDR.") };return stories
         }
-        let bytes = try await data(url)
+        let bytes = try await loader(url)
         let direct = parseFeed(bytes)
         if url.host?.lowercased()=="tldr.tech",url.path=="/api/rss/ai" {
             guard let address=direct.first?.link,let edition=URL(string:address),edition.scheme=="https",edition.host?.lowercased()=="tldr.tech",edition.path.hasPrefix("/ai/") else { throw PageError.invalid("Le flux TLDR ne contient pas d’édition quotidienne valide.") }
-            let stories=TLDRReader.stories(in:String(decoding:try await data(edition),as:UTF8.self),edition:edition)
+            let stories=TLDRReader.stories(in:String(decoding:try await loader(edition),as:UTF8.self),edition:edition)
             guard !stories.isEmpty else { throw PageError.invalid("Les résumés de cette édition TLDR sont indisponibles.") };return stories
         }
         if !direct.isEmpty { return direct }
         let candidates = discoveredFeeds(in: String(decoding: bytes, as: UTF8.self), base: url)
         for feed in candidates.prefix(4) {
-            if let bytes = try? await data(feed) {
+            if let bytes = try? await loader(feed) {
                 let articles = parseFeed(bytes)
                 if !articles.isEmpty { return articles }
             }

@@ -18,11 +18,23 @@ import CryptoKit
             for font in page.fonts {
                 if let provider = CGDataProvider(data: font.data as CFData), let cgFont = CGFont(provider) { CTFontManagerRegisterGraphicsFont(cgFont, nil) }
             }
-            if !CommandLine.arguments.contains("--cached") { page.sources = try await SourceService.fetch(for: page) }
+            let deployment = (try? String(contentsOf: input.deletingLastPathComponent().appendingPathComponent("deployment.txt"), encoding: .utf8))?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            if !CommandLine.arguments.contains("--cached") {
+                if let i = CommandLine.arguments.firstIndex(of: "--previous"), CommandLine.arguments.indices.contains(i + 1),
+                   let url = URL(string: CommandLine.arguments[i + 1]),
+                   let bytes = try? await SourceService.data(url),
+                   let previous = SourceService.previousSources(bytes, deploymentID: deployment) { page.sources = previous }
+                page.sources = try await SourceService.fetch(for: page)
+                for (source, error) in (page.sources.sourceErrors ?? [:]).sorted(by: {$0.key < $1.key}) {
+                    print("Source conservée sans actualisation : \(source) : \(error)")
+                }
+            }
             let now = Date()
             let png = try PageRenderer.png(page, date: now)
             try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
             try png.write(to: output.appendingPathComponent("dashboard.png"), options: .atomic)
+            let cache = SourceService.Cache(deploymentID: deployment, sources: page.sources)
+            try JSONEncoder().encode(cache).write(to: output.appendingPathComponent("sources.json"), options: .atomic)
             let sha = SHA256.hash(data: png).map { String(format: "%02x", $0) }.joined()
             try "\(sha)  dashboard.png\n".write(to: output.appendingPathComponent("dashboard.sha256"), atomically: true, encoding: .utf8)
             try ISO8601DateFormatter().string(from: now).write(to: output.appendingPathComponent("version.txt"), atomically: true, encoding: .utf8)

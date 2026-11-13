@@ -218,6 +218,8 @@ struct SourceSnapshot: Codable, Equatable {
     var fetchedAt: Date?
     var example = true
     var newsFetchedAt: [String: Date]?
+    var weatherFetchedAt: [String: Date]?
+    var sourceErrors: [String: String]?
     static var sample: Self {
         .init(weather: ["Bouliac|celsius": .reference], news: ["https://techcrunch.com/category/artificial-intelligence/feed/": [
             .init(title: "L’intelligence artificielle entre dans le quotidien", summary: "Recherche, création et nouveaux usages : les sujets à suivre aujourd’hui. Les outils évoluent et trouvent leur place dans les gestes du quotidien, de la recherche d’informations à la création. Prenez quelques minutes pour découvrir les idées qui façonnent notre rapport à la technologie.", link: "example:1"),

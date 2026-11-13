@@ -39,12 +39,13 @@ jobs:
           key: kindle-renderer-${{ runner.os }}-${{ runner.arch }}-${{ steps.compiler.outputs.key }}-${{ hashFiles('atelier/renderer/**') }}
       - name: Compiler le moteur natif
         run: swift build -c release --package-path atelier/renderer
+      - uses: actions/configure-pages@v5
+        id: pages
       - name: Produire l’édition
         run: |
-          atelier/renderer/.build/release/RenderKindle atelier/composition.kindlepage site
+          atelier/renderer/.build/release/RenderKindle atelier/composition.kindlepage site --previous "${{ steps.pages.outputs.base_url }}/sources.json"
           cp atelier/deployment.txt site/deployment.txt
           date -u +%s > site/generated-at.txt
-      - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

@@ -117,6 +117,10 @@ struct BlockContent: View {
                 Text(block.text).font(.custom(block.fontName, size: block.fontSize * 1.08).weight(.semibold))
                     .fixedSize(horizontal: false, vertical: true)
             }
+            if page.sources.sourceErrors?["news:" + block.sourceURL] != nil {
+                Text("Source indisponible · dernière récupération : " + WeatherText.updateTime(page.sources.newsFetchedAt?[block.sourceURL], relativeTo: date, timezone: page.schedule.timezone))
+                    .font(.custom("Inter", size: max(13, block.fontSize * 0.48))).foregroundStyle(Color(white: 0.4))
+            }
             if let articles = page.sources.news[block.sourceURL], !articles.isEmpty {
                 ForEach(Array(articles.dropFirst(block.newsOffset).prefix(block.articleCount).enumerated()), id: \.offset) { _, item in
                     VStack(alignment: .leading, spacing: 9) {

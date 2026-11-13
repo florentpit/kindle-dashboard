@@ -97,7 +97,7 @@ struct DetailedWeatherView: View {
         return block.city+(region.isEmpty ? "":" · "+region)
     }
     private var updateTime:String {
-        WeatherText.updateTime(page.sources.fetchedAt ?? weather?.observedAt,relativeTo:date,timezone:page.schedule.timezone)
+        WeatherText.updateTime(page.sources.weatherFetchedAt?["\(block.city)|\(block.unit)"] ?? weather?.observedAt ?? page.sources.fetchedAt,relativeTo:date,timezone:page.schedule.timezone)
     }
     private func time(_ date:Date?)->String { date.map{formatted($0,"HH:mm")} ?? "—" }
     private func formatted(_ date:Date,_ format:String)->String {
