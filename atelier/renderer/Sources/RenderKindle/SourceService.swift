@@ -35,6 +35,31 @@ enum SourceService {
         throw URLError(.unknown)
     }
 
+    /// Hosted macOS runners can stall in URLSession while reaching the weather
+    /// provider. The system curl gives the renderer an explicit IPv4 route.
+    static func serverData(_ url: URL, executable: String = "/usr/bin/curl") async throws -> Data {
+        guard url.scheme == "https" else { throw PageError.invalid("La source doit utiliser HTTPS.") }
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("atelier-source-" + UUID().uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let output = folder.appendingPathComponent("source.data")
+        let process = Process(); process.executableURL = URL(fileURLWithPath: executable)
+        process.arguments = ["--ipv4", "--fail", "--silent", "--show-error", "--location", "--proto", "=https", "--proto-redir", "=https", "--connect-timeout", "8", "--max-time", "25", "--retry", "2", "--retry-delay", "1", "--retry-max-time", "75", "--max-filesize", "8000000", "--user-agent", "AtelierKindle/0.7.9", "--output", output.path, url.absoluteString]
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        try Task.checkCancellation(); try process.run()
+        defer { if process.isRunning { process.terminate() } }
+        while process.isRunning { try await Task.sleep(nanoseconds: 20_000_000) }
+        guard process.terminationStatus == 0 else {
+            // A second HTTPS transport is useful if curl's route is unavailable.
+            // No insecure certificate option is ever used.
+            return try await data(url, session: .shared, attempts: 1)
+        }
+        let bytes = try Data(contentsOf: output)
+        guard bytes.count < 8_000_000 else { throw PageError.invalid("La source dépasse la taille maximale.") }
+        return bytes
+    }
+
     static func fetch(for page: KindlePage) async throws -> SourceSnapshot {
         try await fetch(for: page, loader: { try await data($0) })
     }

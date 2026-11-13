@@ -24,7 +24,7 @@ import CryptoKit
                    let url = URL(string: CommandLine.arguments[i + 1]),
                    let bytes = try? await SourceService.data(url),
                    let previous = SourceService.previousSources(bytes, deploymentID: deployment) { page.sources = previous }
-                page.sources = try await SourceService.fetch(for: page)
+                page.sources = try await SourceService.fetch(for: page, loader: { try await SourceService.serverData($0) })
                 for (source, error) in (page.sources.sourceErrors ?? [:]).sorted(by: {$0.key < $1.key}) {
                     print("Source conservée sans actualisation : \(source) : \(error)")
                 }
