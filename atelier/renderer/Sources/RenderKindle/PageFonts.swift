@@ -15,8 +15,11 @@ enum PageFonts {
     }
     static func register(_ page: KindlePage, resources: URL) throws {
         for (file, expected) in bundled {
-            let url = resources.appendingPathComponent("Resources/Fonts/" + file + ".ttf")
-            guard let data = try? Data(contentsOf: url), let provider = CGDataProvider(data: data as CFData),
+            // Xcode creates Contents/Resources/Resources/Fonts; swift build on
+            // hosted macOS can expose the flat bundle's Resources as resourceURL.
+            let candidates = ["Resources/Fonts/", "Fonts/"].map { resources.appendingPathComponent($0 + file + ".ttf") }
+            guard let url = candidates.first(where: { FileManager.default.fileExists(atPath: $0.path) }),
+                  let data = try? Data(contentsOf: url), let provider = CGDataProvider(data: data as CFData),
                   let font = CGFont(provider), font.postScriptName as String? == expected else {
                 throw PageError.invalid("La police embarquée \(file) est absente ou invalide.")
             }
